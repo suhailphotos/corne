@@ -1,7 +1,7 @@
 /*
  * Corne (nice!nano v2)
  * Base: QWERTY with home-row mods (later)
- * Layers: Lower (Numbers/BT/Arrows), Raise (Symbols), Num, Func
+ * Layers: Lower (Numbers/Arrows), Raise (Symbols), Num, Func & BT
  * Photo intent:
  *   - Top-left key: Base=Esc, Raise=Option (LALT). Lower inherits Base.
  *   - Leftmost on row 2: Base=Tab, Raise=Shift (LSHFT). Lower inherits Base.
@@ -140,16 +140,41 @@
             bindings = <&sk LGUI &sk LSHFT &kp N4 &kp SPACE>;
         };
 
-        /* ── Spotlight: open, then jump to Applications category ─────────── */
+        /* ── Spotlight / Launcher categories (all prefix with Cmd+Space) ── */
+
+        spotlight_main: spotlight_main {
+            compatible = "zmk,behavior-macro";
+            label = "SPOTLIGHT_MAIN";
+            #binding-cells = <0>;
+            bindings = <&sk LGUI &kp SPACE>;
+        };
 
         spotlight_apps: spotlight_apps {
             compatible = "zmk,behavior-macro";
             label = "SPOTLIGHT_APPS";
             #binding-cells = <0>;
-
-            // Cmd+Space, then Cmd+1 (uses one-shot Cmd so they chord cleanly)
-
             bindings = <&sk LGUI &kp SPACE &sk LGUI &kp N1>;
+        };
+
+        spotlight_files: spotlight_files {
+            compatible = "zmk,behavior-macro";
+            label = "SPOTLIGHT_FILES";
+            #binding-cells = <0>;
+            bindings = <&sk LGUI &kp SPACE &sk LGUI &kp N2>;
+        };
+
+        spotlight_actions: spotlight_actions {
+            compatible = "zmk,behavior-macro";
+            label = "SPOTLIGHT_ACTIONS";
+            #binding-cells = <0>;
+            bindings = <&sk LGUI &kp SPACE &sk LGUI &kp N3>;
+        };
+
+        spotlight_clipboard: spotlight_clipboard {
+            compatible = "zmk,behavior-macro";
+            label = "SPOTLIGHT_CLIPBOARD";
+            #binding-cells = <0>;
+            bindings = <&sk LGUI &kp SPACE &sk LGUI &kp N4>;
         };
     };
 
@@ -176,10 +201,10 @@
         lower_layer {
             display-name = "Lower";
             bindings = <
-&tog 5     &kp N1        &kp N2         &kp N3        &kp N4        &kp N5           &kp N6          &kp N7             &kp N8           &kp N9      &kp N0           &kp BSPC
-&tog 3     &bt BT_SEL 0  &bt BT_SEL 1   &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4     &kp LEFT        &kp DOWN           &kp UP           &kp RIGHT   &spotlight_apps  &kp ENTER
-&kp LSHFT  &bt BT_CLR    &ss_full_clip  &kp C_BRI_UP  &kp C_BRI_DN  &ss_area_clip    &kp C_PREVIOUS  &kp C_VOLUME_DOWN  &kp C_VOLUME_UP  &kp C_NEXT  &kp C_MUTE       &kp C_PP
-                                        &kp LGUI      &trans        &kp SPACE        &kp RET         &mo 4              &kp RALT
+&tog 5     &kp N1           &kp N2            &kp N3              &kp N4                &kp N5             &kp N6          &kp N7             &kp N8           &kp N9      &kp N0      &kp BSPC
+&tog 3     &spotlight_apps  &spotlight_files  &spotlight_actions  &spotlight_clipboard  &spotlight_main    &kp LEFT        &kp DOWN           &kp UP           &kp RIGHT   &none       &kp ENTER
+&kp LSHFT  &none            &none             &ss_full_clip       &ss_area_clip         &ss_ui             &kp C_PREVIOUS  &kp C_VOLUME_DOWN  &kp C_VOLUME_UP  &kp C_NEXT  &kp C_MUTE  &kp C_PP
+                                              &kp LGUI            &trans                &kp SPACE          &kp RET         &mo 4              &kp RALT
             >;
         };
 
@@ -212,10 +237,10 @@
         func_layer {
             display-name = "Func";
             bindings = <
-&trans  &kp F1   &kp F2   &kp F3  &kp F4  &kp F5    &kp F6  &kp F7  &kp F8  &kp F9  &kp F10  &trans
-&trans  &kp F11  &kp F12  &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans   &trans
-&trans  &trans   &trans   &trans  &trans  &trans    &trans  &trans  &trans  &trans  &trans   &trans
-                          &trans  &trans  &trans    &trans  &trans  &trans
+&trans      &kp F1        &kp F2        &kp F3        &kp F4        &kp F5          &kp F6          &kp F7         &kp F8         &kp F9         &kp F10        &trans
+&trans      &kp F11       &kp F12       &kp C_BRI_UP  &kp C_BRI_DN  &trans          &trans          &trans         &trans         &trans         &trans         &trans
+&bt BT_CLR  &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4    &bt BT_CLR_ALL  &bt BT_DISC 0  &bt BT_DISC 1  &bt BT_DISC 2  &bt BT_DISC 3  &bt BT_DISC 4
+                                        &trans        &trans        &trans          &trans          &trans         &trans
             >;
         };
 
@@ -236,9 +261,9 @@
         art {
             display-name = "Art";
             bindings = <
-&kp LALT   &none  &none  &kp E     &kp LEFT_BRACE    &kp RIGHT_BRACE      &kp N7  &kp N8  &kp N9  &sk LSHFT  &none  &none
-&kp LSHFT  &kp J  &kp S  &kp BSPC  &kp LEFT_BRACKET  &kp RIGHT_BRACKET    &kp N4  &kp N5  &kp N6  &none      &none  &kp D
-&tog 6     &kp Z  &kp X  &kp C     &ps_hide_sel      &kp B                &kp N1  &kp N2  &kp N3  &none      &none  &none
+&kp LALT   &none  &kp D  &kp E     &kp LEFT_BRACE    &kp RIGHT_BRACE      &kp N7  &kp N8  &kp N9  &none  &none  &none
+&kp LSHFT  &kp J  &kp S  &kp BSPC  &kp LEFT_BRACKET  &kp RIGHT_BRACKET    &kp N4  &kp N5  &kp N6  &none  &none  &none
+&tog 6     &kp Z  &kp X  &kp C     &ps_hide_sel      &kp B                &kp N1  &kp N2  &kp N3  &none  &none  &none
                          &kp LGUI  &none             &kp SPACE            &kp N0  &none   &none
             >;
         };
