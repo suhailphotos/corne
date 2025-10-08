@@ -2,6 +2,7 @@
 
 QWERTY base with **Lower** (numbers/BT/arrows), **Raise** (symbols), **Num** (right-hand numpad + nav), **Func** (F-keys), and a **Mouse** layer you can toggle for one-hand pointer control. Optimized for macOS media keys and a near‑stock QWERTY feel.
 
+test
 ---
 
 ## Hardware
