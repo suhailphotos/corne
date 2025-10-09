@@ -181,6 +181,56 @@
     macros {
     };
 
+    combos {
+        compatible = "zmk,combos";
+
+        /* ── Right hand = Terminal splits (Ghostty/iTerm) ───────── */
+
+        combo_term_v: combo_term_v {
+            bindings = <&split_x>;
+            key-positions = <18 19>;   // H + J
+            layers = <2>;              // Raise only
+            timeout-ms = <40>;
+        };
+
+        combo_term_h: combo_term_h {
+            bindings = <&split_v>;
+            key-positions = <19 20>;   // J + K
+            layers = <2>;
+            timeout-ms = <40>;
+        };
+
+        combo_term_close: combo_term_close {
+            bindings = <&split_h>;
+            key-positions = <20 21>;   // K + L
+            layers = <2>;
+            timeout-ms = <40>;
+        };
+
+        /* ── Left hand = Neovim splits ─────────────────────────── */
+
+        combo_nv_vsplit: combo_nv_vsplit {
+            bindings = <&nv_hsplit>;
+            key-positions = <14 15>;   // S + D
+            layers = <2>;
+            timeout-ms = <40>;
+        };
+
+        combo_nv_hsplit: combo_nv_hsplit {
+            bindings = <&nv_vsplit>;
+            key-positions = <15 16>;   // D + F
+            layers = <2>;
+            timeout-ms = <40>;
+        };
+
+        combo_nv_close: combo_nv_close {
+            bindings = <&nv_close>;
+            key-positions = <16 17>;   // F + G
+            layers = <2>;
+            timeout-ms = <40>;
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
@@ -213,10 +263,10 @@
         raise_layer {
             display-name = "Raise";
             bindings = <
-&kp TILDE  &kp EXCLAMATION  &kp AT_SIGN    &kp HASH          &kp PLUS         &kp MINUS         &kp DOUBLE_QUOTES  &kp LEFT_BRACE    &kp RIGHT_BRACE    &kp COLON      &split_v  &nv_vsplit
-&kp GRAVE  &kp CARET        &kp LESS_THAN  &kp GREATER_THAN  &kp EQUAL        &kp UNDERSCORE    &kp SQT            &kp LPAR          &kp RPAR           &kp SEMICOLON  &split_h  &nv_hsplit
-&tog 6     &kp DOLLAR       &kp BACKSLASH  &kp PIPE          &kp KP_ASTERISK  &kp KP_SLASH      &kp AMPERSAND      &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &kp PERCENT    &split_x  &nv_close
-                                           &kp LGUI          &trans           &kp SPACE         &kp RET            &trans            &kp RALT
+&kp TILDE  &kp EXCLAMATION  &kp AT_SIGN           &kp HASH               &kp DOLLAR         &kp PERCENT    &kp CARET         &kp AMPERSAND      &kp ASTERISK   &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &kp MINUS
+&kp GRAVE  &kp SEMICOLON    &kp LEFT_PARENTHESIS  &kp RIGHT_PARENTHESIS  &kp DOUBLE_QUOTES  &kp PLUS       &kp LEFT_BRACE    &kp RIGHT_BRACE    &kp PIPE       &kp BACKSLASH         &kp COLON              &kp UNDERSCORE
+&tog 6     &kp SLASH        &kp COMMA             &kp PERIOD             &kp SINGLE_QUOTE   &kp EQUAL      &kp LEFT_BRACKET  &kp RIGHT_BRACKET  &kp LESS_THAN  &kp GREATER_THAN      &kp QUESTION           &kp RIGHT_SHIFT
+                                                  &kp LGUI               &trans             &kp SPACE      &kp RET           &trans             &kp RALT
             >;
         };
 
