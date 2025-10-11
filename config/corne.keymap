@@ -277,8 +277,8 @@
             display-name = "Lower";
             bindings = <
 &tog 5     &kp N1           &kp N2            &kp N3              &kp N4                &kp N5             &kp N6          &kp N7             &kp N8           &kp N9      &kp N0      &kp BSPC
-&tog 3     &spotlight_apps  &spotlight_files  &spotlight_actions  &spotlight_clipboard  &spotlight_main    &kp LEFT        &kp DOWN           &kp UP           &kp RIGHT   &none       &kp ENTER
-&kp LSHFT  &none            &none             &ss_full_clip       &ss_area_clip         &ss_ui             &kp C_PREVIOUS  &kp C_VOLUME_DOWN  &kp C_VOLUME_UP  &kp C_NEXT  &kp C_MUTE  &kp C_PP
+&trans     &spotlight_apps  &spotlight_files  &spotlight_actions  &spotlight_clipboard  &spotlight_main    &kp LEFT        &kp DOWN           &kp UP           &kp RIGHT   &none       &kp ENTER
+&kp LSHFT  &tog 3           &none             &ss_full_clip       &ss_area_clip         &ss_ui             &kp C_PREVIOUS  &kp C_VOLUME_DOWN  &kp C_VOLUME_UP  &kp C_NEXT  &kp C_MUTE  &kp C_PP
                                               &kp LGUI            &trans                &kp SPACE          &kp RET         &mo 4              &kp RALT
             >;
         };
