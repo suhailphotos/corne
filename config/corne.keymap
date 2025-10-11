@@ -176,6 +176,13 @@
             #binding-cells = <0>;
             bindings = <&sk LGUI &kp SPACE &sk LGUI &kp N4>;
         };
+
+        ps_stamp: ps_stamp {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&sk LEFT_COMMAND &sk LEFT_ALT &sk LEFT_SHIFT &kp E>;
+            label = "PS_STAMP";
+        };
     };
 
     macros {
@@ -228,6 +235,26 @@
             key-positions = <16 17>;   // F + G
             layers = <2>;
             timeout-ms = <40>;
+        };
+
+        /* Base-layer: holdable Left Option via A+Q (safe for ⌥-drag in PS) */
+
+        combo_alt_hold_aq {
+            bindings = <&kp LALT>;      // holds while A+Q are held
+            key-positions = <13 1>;
+            layers = <0>;               // base only
+            timeout-ms = <35>;
+            require-prior-idle;
+        };
+
+        /* Base-layer: Q+W+E -> Cmd+Opt+Shift+E (Stamp Visible) */
+
+        combo_ps_stamp_qwe {
+            bindings = <&ps_stamp>;
+            key-positions = <1 2 3>;
+            layers = <0>;
+            timeout-ms = <50>;
+            require-prior-idle;
         };
     };
 
