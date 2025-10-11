@@ -237,12 +237,12 @@
             timeout-ms = <40>;
         };
 
-        /* Base-layer: holdable Left Option via A+Q (safe for ⌥-drag in PS) */
+        /* Base-layer: holdable Left Option via Z+X (safe for ⌥-drag in PS) */
 
-        combo_alt_hold_aq {
+        combo_alt_hold_zx {
             bindings = <&kp LALT>;      // holds while A+Q are held
-            key-positions = <13 1>;
-            layers = <0>;               // base only
+            key-positions = <25 26>;
+            layers = <0 6>;               // base only
             timeout-ms = <35>;
         };
 
@@ -251,7 +251,7 @@
         combo_ps_stamp_qwe {
             bindings = <&ps_stamp>;
             key-positions = <1 2 3>;
-            layers = <0>;
+            layers = <0 6>;
             timeout-ms = <50>;
         };
     };
@@ -300,8 +300,8 @@
         num_layer {
             display-name = "Num";
             bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans    &kp N7  &kp N8   &kp N9    &kp FSLH         &kp HOME  &kp PG_UP
-&tog 3  &trans  &trans  &trans  &trans  &trans    &kp N4  &kp N5   &kp N6    &kp KP_MULTIPLY  &kp DEL   &kp PG_DN
+&tog 3  &trans  &trans  &trans  &trans  &trans    &kp N7  &kp N8   &kp N9    &kp FSLH         &kp HOME  &kp PG_UP
+&trans  &trans  &trans  &trans  &trans  &trans    &kp N4  &kp N5   &kp N6    &kp KP_MULTIPLY  &kp DEL   &kp PG_DN
 &trans  &trans  &trans  &trans  &trans  &trans    &kp N1  &kp N2   &kp N3    &kp MINUS        &kp END   &kp RET
                         &trans  &trans  &trans    &kp N0  &kp DOT  &kp PLUS
             >;
@@ -336,10 +336,10 @@
         art {
             display-name = "Art";
             bindings = <
-&kp LALT   &none  &kp D  &kp E     &kp LEFT_BRACE    &kp RIGHT_BRACE      &kp N7  &kp N8  &kp N9  &none  &none  &none
-&kp LSHFT  &kp J  &kp S  &kp BSPC  &kp LEFT_BRACKET  &kp RIGHT_BRACKET    &kp N4  &kp N5  &kp N6  &none  &none  &none
-&tog 6     &kp Z  &kp X  &kp C     &ps_hide_sel      &kp B                &kp N1  &kp N2  &kp N3  &none  &none  &none
-                         &kp LGUI  &none             &kp SPACE            &kp N0  &none   &none
+&tog 6          &kp Q  &kp D  &kp E     &kp LEFT_BRACE    &kp RIGHT_BRACE      &kp N7  &kp N8  &kp N9  &none  &none  &none
+&kp LEFT_ALT    &kp J  &kp S  &kp BSPC  &kp LEFT_BRACKET  &kp RIGHT_BRACKET    &kp N4  &kp N5  &kp N6  &none  &none  &none
+&kp LEFT_SHIFT  &kp Z  &kp X  &kp C     &ps_hide_sel      &kp B                &kp N1  &kp N2  &kp N3  &none  &none  &none
+                              &kp LGUI  &none             &kp SPACE            &kp N0  &none   &none
             >;
         };
     };
