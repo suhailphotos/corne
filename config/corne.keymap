@@ -66,7 +66,7 @@
 
             // ESC :vsplit<CR>
 
-            bindings = <&kp ESC &kp COLON &kp V &kp S &kp P &kp L &kp I &kp T &kp RET>;
+            bindings = <&sk LCTRL &kp W &kp V>;   // <C-w> v
         };
 
         nv_hsplit: nv_hsplit {
@@ -76,7 +76,7 @@
 
             // ESC :split<CR>
 
-            bindings = <&kp ESC &kp COLON &kp S &kp P &kp L &kp I &kp T &kp RET>;
+            bindings = <&sk LCTRL &kp W &kp S>;   // <C-w> s
         };
 
         nv_close: nv_close {
@@ -86,7 +86,7 @@
 
             // ESC :close<CR>  (close current window/split, keep buffer)
 
-            bindings = <&kp ESC &kp COLON &kp C &kp L &kp O &kp S &kp E &kp RET>;
+            bindings = <&sk LCTRL &kp W &kp C>;   // <C-w> c
         };
 
         ps_hide_sel: ps_hide_sel {
