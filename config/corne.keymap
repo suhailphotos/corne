@@ -193,21 +193,21 @@
 
         /* ── Right hand = Terminal splits (Ghostty/iTerm) ───────── */
 
-        combo_term_v: combo_term_v {
+        combo_term_v: combo_term_x {
             bindings = <&split_x>;
             key-positions = <18 19>;   // H + J
             layers = <2>;              // Raise only
             timeout-ms = <40>;
         };
 
-        combo_term_h: combo_term_h {
+        combo_term_h: combo_term_v {
             bindings = <&split_v>;
             key-positions = <19 20>;   // J + K
             layers = <2>;
             timeout-ms = <40>;
         };
 
-        combo_term_close: combo_term_close {
+        combo_term_close: combo_term_h {
             bindings = <&split_h>;
             key-positions = <20 21>;   // K + L
             layers = <2>;
@@ -216,14 +216,14 @@
 
         /* ── Left hand = Neovim splits ─────────────────────────── */
 
-        combo_nv_vsplit: combo_nv_vsplit {
+        combo_nv_vsplit: combo_nv_hsplit {
             bindings = <&nv_hsplit>;
             key-positions = <14 15>;   // S + D
             layers = <2>;
             timeout-ms = <40>;
         };
 
-        combo_nv_hsplit: combo_nv_hsplit {
+        combo_nv_hsplit: combo_nv_vsplit {
             bindings = <&nv_vsplit>;
             key-positions = <15 16>;   // D + F
             layers = <2>;
