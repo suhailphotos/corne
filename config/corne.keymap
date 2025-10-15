@@ -237,7 +237,7 @@
             timeout-ms = <40>;
         };
 
-        /* Base-layer: holdable Left Option via Z+X (safe for ⌥-drag in PS) */
+        /* Base+Art layers: holdable Left Option via Z+X (safe for ⌥-drag in PS) */
 
         combo_alt_hold_zx {
             bindings = <&kp LALT>;      // holds while A+Q are held
