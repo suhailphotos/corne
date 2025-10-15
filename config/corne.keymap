@@ -123,14 +123,14 @@
             compatible = "zmk,behavior-macro";
             label = "SS_FULL_CLIP";       // Cmd+Ctrl+Shift+3 (full → clipboard)
             #binding-cells = <0>;
-            bindings = <&sk LGUI &sk LSHFT &sk LCTRL &kp N3>;
+            bindings = <&sk LGUI &sk LSHFT &kp N3>;
         };
 
         ss_area_clip: ss_area_clip {
             compatible = "zmk,behavior-macro";
             label = "SS_AREA_CLIP";       // Cmd+Ctrl+Shift+4 (region → clipboard)
             #binding-cells = <0>;
-            bindings = <&sk LGUI &sk LSHFT &sk LCTRL &kp N4>;
+            bindings = <&sk LGUI &sk LSHFT &kp N4>;
         };
 
         ss_window: ss_window {
