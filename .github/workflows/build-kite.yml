@@ -1,8 +1,9 @@
-name: Kite (QMK)
+name: Build QMK (Kite)
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,6 +17,13 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
 
+      - name: Install toolchains
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi \
+            gcc-avr avr-libc dfu-util
+
       - name: Fetch QMK Firmware
         uses: actions/checkout@v4
         with:
@@ -28,15 +36,7 @@ jobs:
           mkdir -p qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}
           rsync -a qmk/keyboards/ qmk_firmware/keyboards/
 
-      - name: Install build dependencies (ARM + AVR)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi \
-            gcc-avr binutils-avr avr-libc \
-            dfu-programmer dfu-util teensy-loader-cli
-
-      - name: Set up QMK CLI
+      - name: Install QMK CLI
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install qmk
@@ -52,5 +52,5 @@ jobs:
           name: ${{ matrix.keyboard }}-${{ matrix.keymap }}
           path: |
             qmk_firmware/*.hex
-            qmk_firmware/*.bin
             qmk_firmware/*.uf2
+            qmk_firmware/*.bin
