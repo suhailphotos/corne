@@ -46,24 +46,42 @@ jobs:
         working-directory: qmk_firmware
         run: qmk compile -kb ${{ matrix.keyboard }} -km ${{ matrix.keymap }}
 
-      - name: Compute artifact + output glob
+      - name: Compute artifact name
         id: names
         run: |
           KB="${{ matrix.keyboard }}"
-          KB_SAFE="${KB//\//-}"                     # boardsource/unicorne -> boardsource-unicorne
-          KB_FS="${KB//\//_}"                       # boardsource/unicorne -> boardsource_unicorne
+          KB_SAFE="${KB//\//-}"          # boardsource/unicorne -> boardsource-unicorne
           echo "ARTIFACT_NAME=qmk-${KB_SAFE}-${{ matrix.keymap }}" >> "$GITHUB_ENV"
-          echo "BUILT_GLOB=qmk_firmware/.build/${KB_FS}_${{ matrix.keymap }}.*" >> "$GITHUB_ENV"
 
       - name: List build outputs (debug)
         run: |
+          pwd
           ls -la qmk_firmware/.build || true
-          echo "Expecting: ${{ env.BUILT_GLOB }}"
-          ls -la ${{ env.BUILT_GLOB }} || true
+
+      - name: Find exact firmware file
+        id: findfile
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix="qmk_firmware/.build/${{ matrix.keyboard//\//_ }}_${{ matrix.keymap }}"
+          echo "Prefix: $prefix"
+          if compgen -G "${prefix}.uf2" > /dev/null; then
+            file="${prefix}.uf2"
+          elif compgen -G "${prefix}.hex" > /dev/null; then
+            file="${prefix}.hex"
+          elif compgen -G "${prefix}.bin" > /dev/null; then
+            file="${prefix}.bin"
+          else
+            echo "No firmware file produced with prefix ${prefix}" >&2
+            ls -la qmk_firmware/.build || true
+            exit 1
+          fi
+          echo "BUILT_FILE=$file" >> "$GITHUB_ENV"
+          echo "Found: $file"
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.BUILT_GLOB }}
+          path: ${{ env.BUILT_FILE }}
           if-no-files-found: error
