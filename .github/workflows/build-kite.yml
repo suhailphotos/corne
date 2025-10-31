@@ -1,0 +1,48 @@
+name: Kite (QMK)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        keyboard: [boardsource/unicorne]
+        keymap:   [suhail]
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Fetch QMK Firmware
+        uses: actions/checkout@v4
+        with:
+          repository: qmk/qmk_firmware
+          path: qmk_firmware
+          submodules: recursive
+
+      - name: Copy our keymap into QMK tree
+        run: |
+          mkdir -p qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}
+          rsync -a qmk/keyboards/ qmk_firmware/keyboards/
+
+      - name: Set up QMK CLI
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install qmk
+          qmk --version
+
+      - name: Compile
+        working-directory: qmk_firmware
+        run: qmk compile -kb ${{ matrix.keyboard }} -km ${{ matrix.keymap }}
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.keyboard }}-${{ matrix.keymap }}
+          path: |
+            qmk_firmware/*.hex
+            qmk_firmware/*.bin
+            qmk_firmware/*.uf2
