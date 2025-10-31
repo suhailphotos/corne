@@ -121,7 +121,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_RAISE] = LAYOUT_split_3x6_3(
   KC_TILD, KC_EXLM, KC_AT, KC_HASH, KC_DLR, KC_PERC,    KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_UNDS,
   KC_GRV,  KC_PIPE, KC_TILD, KC_MINS, S(KC_QUOT), KC_PLUS, KC_LCBR, KC_RCBR, KC_LPRN, KC_RPRN, KC_COLN, S(KC_QUOT),
-  KC_CAPS, KC_BSLS, KC_GRV, KC_UNDS, KC_QUOT, KC_EQL,   KC_LBRC, KC_RBRC, KC_LABK, KC_RABK, KC_QUES, _______,
+  KC_CAPS, KC_BSLS, KC_GRV, KC_UNDS, KC_QUOT, KC_EQL,   KC_LBRC, KC_RBRC, KC_LT,   KC_GT,   KC_QUES, _______,
                                KC_LGUI, _______, KC_SPC, KC_ENT, _______, KC_RALT
 ),
 
@@ -189,7 +189,7 @@ combo_t key_combos[] = {
 };
 
 // Limit combos to intended layers
-bool combo_should_trigger(uint16_t combo_index, combo_t *combo, keyrecord_t *record) {
+bool combo_should_trigger(uint16_t combo_index, combo_t *combo) {
   switch (combo_index) {
     case CB_SPLIT_X:
     case CB_SPLIT_V:

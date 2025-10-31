@@ -28,6 +28,14 @@ jobs:
           mkdir -p qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}
           rsync -a qmk/keyboards/ qmk_firmware/keyboards/
 
+      - name: Install build dependencies (ARM + AVR)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-arm-none-eabi binutils-arm-none-eabi libnewlib-arm-none-eabi \
+            gcc-avr binutils-avr avr-libc \
+            dfu-programmer dfu-util teensy-loader-cli
+
       - name: Set up QMK CLI
         run: |
           python3 -m pip install --upgrade pip
