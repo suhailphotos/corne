@@ -71,7 +71,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (!record->event.pressed) return true;
 
   switch (keycode) {
-    case SPLIT_V:      gui_ctrl_tap(KC_BSLS); return false;   // Cmd+Ctrl+\
+    case SPLIT_V:      gui_ctrl_tap(KC_BSLS); return false;   // Cmd+Ctrl+Backslash.
     case SPLIT_H:      gui_ctrl_tap(KC_MINS); return false;   // Cmd+Ctrl+-
     case SPLIT_X:      gui_ctrl_tap(KC_X);    return false;   // Cmd+Ctrl+X
 
@@ -140,10 +140,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_MOUSE] = LAYOUT_split_3x6_3(
-  TG(_MOUSE), _______, _______, _______, _______, _______,   KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, _______, _______,
-  _______, _______, _______, _______, _______, _______,      KC_WH_L, KC_WH_D, KC_WH_U, KC_WH_R, _______, _______,
-  _______, _______, _______, _______, _______, _______,      KC_BTN4, KC_BTN5, _______, _______, _______, _______,
-                               _______, _______, _______,    KC_BTN1, KC_BTN2, KC_BTN3
+  TG(_MOUSE), _______, _______, _______, _______, _______,   KC_MS_LEFT, KC_MS_DOWN, KC_MS_UP, KC_MS_RIGHT, _______, _______,
+  _______, _______, _______, _______, _______, _______,      KC_MS_WH_LEFT, KC_MS_WH_DOWN, KC_MS_WH_UP, KC_MS_WH_RIGHT, _______, _______,
+  _______, _______, _______, _______, _______, _______,      KC_MS_BTN4, KC_MS_BTN5, _______, _______, _______, _______,
+                               _______, _______, _______,    KC_MS_BTN1, KC_MS_BTN2, KC_MS_BTN3
 ),
 
 [_ART] = LAYOUT_split_3x6_3(
