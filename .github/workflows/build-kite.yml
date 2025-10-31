@@ -53,15 +53,24 @@ jobs:
           KB_SAFE="${KB//\//-}"              # boardsource/unicorne -> boardsource-unicorne
           echo "ARTIFACT_NAME=qmk-${KB_SAFE}-${{ matrix.keymap }}" >> "$GITHUB_ENV"
 
+      - name: Compute artifact + output glob
+        id: names
+        run: |
+          KB="${{ matrix.keyboard }}"
+          KB_SAFE="${KB//\//-}"                     # boardsource/unicorne -> boardsource-unicorne
+          KB_FS="${KB//\//_}"                       # boardsource/unicorne -> boardsource_unicorne
+          echo "ARTIFACT_NAME=qmk-${KB_SAFE}-${{ matrix.keymap }}" >> "$GITHUB_ENV"
+          echo "BUILT_GLOB=qmk_firmware/.build/${KB_FS}_${{ matrix.keymap }}.*" >> "$GITHUB_ENV"
+
+      - name: List build outputs (debug)
+        run: |
+          ls -la qmk_firmware/.build || true
+          echo "Expecting: ${{ env.BUILT_GLOB }}"
+          ls -la ${{ env.BUILT_GLOB }} || true
+
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: |
-            qmk_firmware/.build/**/*.hex
-            qmk_firmware/.build/**/*.uf2
-            qmk_firmware/.build/**/*.bin
+          path: ${{ env.BUILT_GLOB }}
           if-no-files-found: error
-
-      - name: List build outputs
-        run: ls -R qmk_firmware/.build || true
