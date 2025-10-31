@@ -46,10 +46,17 @@ jobs:
         working-directory: qmk_firmware
         run: qmk compile -kb ${{ matrix.keyboard }} -km ${{ matrix.keymap }}
 
+      - name: Compute artifact name
+        id: names
+        run: |
+          KB="${{ matrix.keyboard }}"
+          KB_SAFE="${KB//\//-}"              # boardsource/unicorne -> boardsource-unicorne
+          echo "ARTIFACT_NAME=qmk-${KB_SAFE}-${{ matrix.keymap }}" >> "$GITHUB_ENV"
+
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: qmk-${{ replace(matrix.keyboard, '/', '-') }}-${{ matrix.keymap }}
+          name: ${{ env.ARTIFACT_NAME }}
           path: |
             qmk_firmware/.build/**/*.hex
             qmk_firmware/.build/**/*.uf2
