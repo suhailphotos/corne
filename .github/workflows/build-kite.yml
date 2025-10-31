@@ -61,10 +61,15 @@ jobs:
       - name: Find exact firmware file
         id: findfile
         shell: bash
+        env:
+          KB: ${{ matrix.keyboard }}
+          KM: ${{ matrix.keymap }}
         run: |
           set -euo pipefail
-          prefix="qmk_firmware/.build/${{ matrix.keyboard//\//_ }}_${{ matrix.keymap }}"
+          KB_SAFE="${KB//\//_}"                         # boardsource/unicorne -> boardsource_unicorne
+          prefix="qmk_firmware/.build/${KB_SAFE}_${KM}" # qmk_firmware/.build/boardsource_unicorne_suhail
           echo "Prefix: $prefix"
+
           if compgen -G "${prefix}.uf2" > /dev/null; then
             file="${prefix}.uf2"
           elif compgen -G "${prefix}.hex" > /dev/null; then
@@ -76,12 +81,14 @@ jobs:
             ls -la qmk_firmware/.build || true
             exit 1
           fi
-          echo "BUILT_FILE=$file" >> "$GITHUB_ENV"
+
+          echo "BUILT_FILE=$file" >> "$GITHUB_ENV"          # for env usage
+          echo "built_file=$file" >> "$GITHUB_OUTPUT"       # as a formal step output
           echo "Found: $file"
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.BUILT_FILE }}
+          path: ${{ steps.findfile.outputs.built_file }}
           if-no-files-found: error
