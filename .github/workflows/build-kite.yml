@@ -8,8 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Use the official QMK CLI container (has all toolchains preinstalled)
-    container: ghcr.io/qmk/qmk_cli:1.3.0
+    # Pin to the linux/amd64 digest of the official QMK CLI image
+    container: ghcr.io/qmk/qmk_cli:latest
 
     strategy:
       matrix:
@@ -26,54 +26,52 @@ jobs:
           repository: qmk/qmk_firmware
           path: qmk_firmware
           submodules: recursive
-          # ref: <optional pinned commit for reproducible builds>
 
       - name: Copy our keymap into QMK tree
         run: |
           mkdir -p "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
-          # Use cp to avoid depending on rsync in the container
-          cp -R qmk/keyboards/* qmk_firmware/keyboards/
-
-      - name: Sanity check target & versions
-        working-directory: qmk_firmware
-        run: |
-          qmk --version
-          qmk info -kb "${{ matrix.keyboard }}" -km "${{ matrix.keymap }}"
+          rsync -a qmk/keyboards/ qmk_firmware/keyboards/
 
       - name: Compile
         working-directory: qmk_firmware
-        run: qmk compile -kb "${{ matrix.keyboard }}" -km "${{ matrix.keymap }}"
+        run: qmk compile -kb ${{ matrix.keyboard }} -km ${{ matrix.keymap }}
 
-      - name: Compute names (sanitize slashes)
+      - name: Compute artifact name
         id: names
+        shell: bash
         env:
           KB: ${{ matrix.keyboard }}
           KM: ${{ matrix.keymap }}
         run: |
-          KB_SAFE_UNDERSCORE="${KB//\//_}"   # boardsource/unicorne -> boardsource_unicorne
-          KB_SAFE_DASH="${KB//\//-}"         # boardsource/unicorne -> boardsource-unicorne
+          KB_DASH="${KB//\//-}"                    # boardsource/unicorne -> boardsource-unicorne
+          KB_UNDER="${KB//\//_}"                   # boardsource/unicorne -> boardsource_unicorne
+          echo "ARTIFACT_NAME=qmk-${KB_DASH}-${KM}" >> "$GITHUB_ENV"
+          echo "PREFIX=qmk_firmware/.build/${KB_UNDER}_${KM}" >> "$GITHUB_ENV"
 
-          echo "artifact_name=qmk-${KB_SAFE_DASH}-${KM}" >> "$GITHUB_OUTPUT"
-          echo "prefix=qmk_firmware/.build/${KB_SAFE_UNDERSCORE}_${KM}" >> "$GITHUB_OUTPUT"
-
-      - name: Find built firmware file
+      - name: Find exact firmware file
         id: findfile
+        shell: bash
         run: |
           set -euo pipefail
-          prefix="${{ steps.names.outputs.prefix }}"
-          for ext in uf2 hex bin; do
-            if compgen -G "${prefix}.${ext}" > /dev/null; then
-              echo "built_file=${prefix}.${ext}" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          done
-          echo "No firmware file produced with prefix ${prefix}" >&2
-          ls -la qmk_firmware/.build || true
-          exit 1
+          prefix="${PREFIX}"
+          if compgen -G "${prefix}.uf2" > /dev/null; then
+            file="${prefix}.uf2"
+          elif compgen -G "${prefix}.hex" > /dev/null; then
+            file="${prefix}.hex"
+          elif compgen -G "${prefix}.bin" > /dev/null; then
+            file="${prefix}.bin"
+          else
+            echo "No firmware file produced with prefix ${prefix}" >&2
+            ls -la qmk_firmware/.build || true
+            exit 1
+          fi
+          echo "BUILT_FILE=$file"        >> "$GITHUB_ENV"
+          echo "built_file=$file"        >> "$GITHUB_OUTPUT"
+          echo "Found: $file"
 
       - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.names.outputs.artifact_name }}
+          name: ${{ env.ARTIFACT_NAME }}
           path: ${{ steps.findfile.outputs.built_file }}
           if-no-files-found: error
