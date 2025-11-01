@@ -69,7 +69,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case SPOTLIGHT_CLIPBOARD: tap_code16(G(KC_SPC)); wait_ms(60); tap_code16(G(KC_4)); return false;
 
         /* Ghostty / iTerm terminal splits */
-        case SPLIT_V:         tap_code16(G(C(KC_BSLS))); return false;  // Cmd+Ctrl+\
+        case SPLIT_V:         tap_code16(G(C(KC_BSLS))); return false;  // Cmd+Ctrl+ backslash
         case SPLIT_H:         tap_code16(G(C(KC_MINS))); return false;  // Cmd+Ctrl+-
         case SPLIT_X:         tap_code16(G(C(KC_X)));    return false;  // Cmd+Ctrl+X
 
