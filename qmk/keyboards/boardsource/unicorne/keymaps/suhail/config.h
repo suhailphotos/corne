@@ -8,4 +8,17 @@
 // Make combo array length flexible so we don't have to keep a hard count.
 #define COMBO_VARIABLE_LEN
 
-// Keep warnings quiet; we already removed the backslash pitfall.
+// --- Combos ---
+#define COMBO_VARIABLE_LEN
+#define COMBO_TERM 40
+
+// ---- Mouse ----
+// Mouse key tuning (tweak later if you like)
+#define MOUSEKEY_INTERVAL         16   // ms between cursor steps
+#define MOUSEKEY_DELAY            0
+#define MOUSEKEY_TIME_TO_MAX      200  // ramp time to max speed
+#define MOUSEKEY_MAX_SPEED        7
+#define MOUSEKEY_WHEEL_DELAY      0
+#define MOUSEKEY_WHEEL_INTERVAL   20
+#define MOUSEKEY_WHEEL_TIME_TO_MAX 200
+#define MOUSEKEY_WHEEL_MAX_SPEED  8
