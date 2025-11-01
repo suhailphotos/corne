@@ -30,7 +30,10 @@ jobs:
       - name: Copy our keymap into QMK tree
         run: |
           mkdir -p "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
-          rsync -a qmk/keyboards/ qmk_firmware/keyboards/
+          # copy the *contents* of qmk/keyboards into qmk_firmware/keyboards
+          cp -R qmk/keyboards/. qmk_firmware/keyboards/
+          # quick sanity check
+          ls -la "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
 
       - name: Compile
         working-directory: qmk_firmware
