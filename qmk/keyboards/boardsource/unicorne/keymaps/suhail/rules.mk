@@ -1,1 +1,5 @@
-# Nothing yet. Future toggles will go here (e.g., MOUSEKEY_ENABLE = yes, RGB_MATRIX_ENABLE = yes)
+# Keep it minimal for now
+# We'll enable COMBOs, RGB, etc. later as we add behavior.
+# (Skipping mouse and fancy features for step 1)
+
+# Nothing special yet
