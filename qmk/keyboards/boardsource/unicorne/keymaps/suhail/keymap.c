@@ -12,27 +12,79 @@ enum layer_names {
     _ART,
 };
 
+// ─────────────────────────────────────────────────────────────
+// Custom keycodes (ZMK behaviors -> QMK macros)
+// ─────────────────────────────────────────────────────────────
+enum custom_keycodes {
+    PS_STAMP = SAFE_RANGE,  // Cmd+Opt+Shift+E
+    PS_HIDE_SEL,            // Cmd+H (hide app)
+
+    // macOS screenshots
+    SS_FULL, SS_AREA, SS_UI, SS_FULL_CLIP, SS_AREA_CLIP, SS_WINDOW,
+
+    // Spotlight
+    SPOTLIGHT_MAIN, SPOTLIGHT_APPS, SPOTLIGHT_FILES, SPOTLIGHT_ACTIONS, SPOTLIGHT_CLIPBOARD,
+
+    // Ghostty / iTerm splits
+    SPLIT_V, SPLIT_H, SPLIT_X,
+
+    // Neovim window ops
+    NV_VSPLIT, NV_HSPLIT, NV_CLOSE,
+};
+
 // Convenience
 #define _______ KC_TRNS
 #define XXXXXXX KC_NO
 
-// Home-row mod-taps that match your intent:
-// - Left thumb row first key on row 2 was "HM LEFT_CONTROL TAB" in ZMK
-// - Right row-2 far right was "HM RIGHT_CONTROL SQT"
+// Home-row mod-taps
 #define HM_LCTL_TAB  MT(MOD_LCTL, KC_TAB)
 #define HM_RCTL_QUOT MT(MOD_RCTL, KC_QUOT)
 
-// Layout note: UniCorne uses the Corne-style LAYOUT_split_3x6_3
-// [12 keys per row] x 3 rows, plus [3 thumbs per side].
+// ─────────────────────────────────────────────────────────────
+// Macro implementation
+// ─────────────────────────────────────────────────────────────
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!record->event.pressed) return true;
 
+    switch (keycode) {
+        /* Photoshop */
+        case PS_STAMP:        tap_code16(G(A(S(KC_E)))); return false; // Cmd+Opt+Shift+E
+        case PS_HIDE_SEL:     tap_code16(G(KC_H));       return false; // Cmd+H
+
+        /* macOS screenshots */
+        case SS_FULL:         tap_code16(G(S(KC_3)));    return false; // Full → file
+        case SS_AREA:         tap_code16(G(S(KC_4)));    return false; // Area → file
+        case SS_UI:           tap_code16(G(S(KC_5)));    return false; // Toolbar
+        case SS_FULL_CLIP:    tap_code16(G(C(S(KC_3)))); return false; // Full → clipboard
+        case SS_AREA_CLIP:    tap_code16(G(C(S(KC_4)))); return false; // Area → clipboard
+        case SS_WINDOW:
+            tap_code16(G(S(KC_4))); wait_ms(60); tap_code(KC_SPC);     // 4 then Space
+            return false;
+
+        /* Spotlight (Cmd+Space then Cmd+1/2/3/4) */
+        case SPOTLIGHT_MAIN:      tap_code16(G(KC_SPC));                 return false;
+        case SPOTLIGHT_APPS:      tap_code16(G(KC_SPC)); wait_ms(60); tap_code16(G(KC_1)); return false;
+        case SPOTLIGHT_FILES:     tap_code16(G(KC_SPC)); wait_ms(60); tap_code16(G(KC_2)); return false;
+        case SPOTLIGHT_ACTIONS:   tap_code16(G(KC_SPC)); wait_ms(60); tap_code16(G(KC_3)); return false;
+        case SPOTLIGHT_CLIPBOARD: tap_code16(G(KC_SPC)); wait_ms(60); tap_code16(G(KC_4)); return false;
+
+        /* Ghostty / iTerm terminal splits */
+        case SPLIT_V:         tap_code16(G(C(KC_BSLS))); return false;  // Cmd+Ctrl+\
+        case SPLIT_H:         tap_code16(G(C(KC_MINS))); return false;  // Cmd+Ctrl+-
+        case SPLIT_X:         tap_code16(G(C(KC_X)));    return false;  // Cmd+Ctrl+X
+
+        /* Neovim window ops: <C-w> v/s/c */
+        case NV_VSPLIT:       tap_code16(C(KC_W)); tap_code(KC_V); return false;
+        case NV_HSPLIT:       tap_code16(C(KC_W)); tap_code(KC_S); return false;
+        case NV_CLOSE:        tap_code16(C(KC_W)); tap_code(KC_C); return false;
+    }
+    return true;
+}
+
+// UniCorne / Corne layout
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-/* ───────────────────────────── Base ─────────────────────────────
- * Esc  Q    W    E    R    T      Y    U    I     O     P     Bspc
- * Ct/T A    S    D    F    G      H    J    K     L     ;     Ct/'
- * LSh  Z    X    C    V    B      N    M    ,     .     /     RSh
- *             LGUI  MO1  Space    Enter  MO2  RAlt
- */
+/* Base */
 [_BASE] = LAYOUT_split_3x6_3(
   KC_ESC,  KC_Q,   KC_W,   KC_E,   KC_R,   KC_T,         KC_Y,   KC_U,   KC_I,    KC_O,    KC_P,    KC_BSPC,
   HM_LCTL_TAB, KC_A, KC_S, KC_D,   KC_F,   KC_G,         KC_H,   KC_J,   KC_K,    KC_L,    KC_SCLN, HM_RCTL_QUOT,
@@ -40,32 +92,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          KC_LGUI, MO(_LOWER), KC_SPC,    KC_ENT, MO(_RAISE), KC_RALT
 ),
 
-/* ─────────────────────────── Lower ─────────────────────────────
- * `    1    2    3    4    5      6    7    8     9     0     -
- *      6    7    8    9    0      ←    ↓    ↑     →     KP/   KP*
- * TG A TG N ____ ____ ____ ____   MPRV VOLD  VOLU  MNXT  MUTE  MPLY
- *             LGUI  ____ Space    Enter  MO4  RAlt
- *
- * Notes:
- * - Placeholder keys (____ = KC_TRNS or KC_NO) where your ZMK macros were.
- * - We’ll wire Spotlight/Screenshot macros in a later step.
- * - TG A = toggle Art layer, TG N = toggle Num layer.
- */
+/* Lower (Numbers / Arrows + Mac actions) */
 [_LOWER] = LAYOUT_split_3x6_3(
   KC_GRV,  KC_1,   KC_2,   KC_3,   KC_4,   KC_5,         KC_6,   KC_7,   KC_8,    KC_9,    KC_0,    KC_MINS,
   _______, KC_6,   KC_7,   KC_8,   KC_9,   KC_0,         KC_LEFT,KC_DOWN,KC_UP,   KC_RIGHT,KC_KP_SLASH, KC_KP_ASTERISK,
-  TG(_ART),TG(_NUM),_______,_______,_______,_______,     KC_MPRV,KC_VOLD,KC_VOLU, KC_MNXT, KC_MUTE, KC_MPLY,
+  TG(_ART),TG(_NUM),_______,SPOTLIGHT_MAIN,SPOTLIGHT_APPS,SS_AREA, KC_MPRV,KC_VOLD,KC_VOLU, KC_MNXT, KC_MUTE, KC_MPLY,
                          KC_LGUI, _______, KC_SPC,       KC_ENT, MO(_FUNC), KC_RALT
 ),
 
-/* ─────────────────────────── Raise ─────────────────────────────
- * ~    !    @    #    $    %      ^    &    *     (     )     _
- * `    |    ~    -    "    +      {    }    (     )     :     "
- * Caps \    `    _    '    =      [    ]    <     >     ?     __
- *             LGUI  ____ Space    Enter  ____ RAlt
- *
- * (Using QMK punctuation keycodes; we can adjust any symbols later.)
- */
+/* Raise (Symbols) */
 [_RAISE] = LAYOUT_split_3x6_3(
   KC_TILD, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC,     KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_UNDS,
   KC_GRV,  KC_PIPE, KC_TILD, KC_MINS, KC_DQUO, KC_PLUS,     KC_LCBR, KC_RCBR, KC_LPRN, KC_RPRN, KC_COLN, KC_DQUO,
@@ -73,12 +108,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          KC_LGUI, _______, KC_SPC,          KC_ENT, _______, KC_RALT
 ),
 
-/* ─────────────────────────── Num (numpad on right) ─────────────
- * TG N ____ ____ ____ ____ ____   Home  7     8     9     -     Bspc
- * ____ ____ ____ ____ ____ ____   PgUp  4     5     6     +     KP*
- * ____ ____ ____ ____ ____ ____   PgDn  1     2     3     =     KP/
- *                  ____ ____ ____ Enter  0     .
- */
+/* Num (right-hand numpad + nav) */
 [_NUM] = LAYOUT_split_3x6_3(
   TG(_NUM), _______, _______, _______, _______, _______,    KC_HOME, KC_P7,   KC_P8,   KC_P9,   KC_PMNS, KC_BSPC,
   _______,  _______, _______, _______, _______, _______,    KC_PGUP, KC_P4,   KC_P5,   KC_P6,   KC_PPLS, KC_KP_ASTERISK,
@@ -86,14 +116,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          _______, _______, _______,          KC_PENT, KC_P0,   KC_PDOT
 ),
 
-/* ─────────────────────────── Func (F-keys) ─────────────────────
- * ____ F1   F2   F3   F4   F5     F6   F7   F8    F9    F10   __
- * ____ F11  F12  F13  F14  F15    F16  F17  F18   F19   F20   __
- * ____ ____ ____ ____ ____ ____   ____ ____ ____  ____  ____  __
- *             ____ ____ ____      ____  ____ ____
- *
- * (We’ll add BT controls later if you really need them in QMK.)
- */
+/* Func (F-keys) — BT selectors were ZMK-only (BLE); we can add OS hotkeys later if needed */
 [_FUNC] = LAYOUT_split_3x6_3(
   _______, KC_F1,  KC_F2,  KC_F3,  KC_F4,  KC_F5,        KC_F6,  KC_F7,  KC_F8,   KC_F9,  KC_F10, _______,
   _______, KC_F11, KC_F12, KC_F13, KC_F14, KC_F15,       KC_F16, KC_F17, KC_F18,  KC_F19, KC_F20, _______,
@@ -101,18 +124,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                          _______, _______, _______,       _______, _______, _______
 ),
 
-/* ─────────────────────────── Art (Photoshop) ───────────────────
- * TG A  Q    D    E    [    ]      ____  7     8     9     __    __
- * LAlt  J    S    Bspc [    ]      ____  4     5     6     __    __
- * ____  Z    X    C    ____  B     ____  1     2     3     __    __
- *             LGUI  __  Space      Enter  0     .
- *
- * (Placeholders kept where your ZMK macros live. We’ll add them next.)
- */
+/* Art (Photoshop) */
 [_ART] = LAYOUT_split_3x6_3(
   TG(_ART), KC_Q,   KC_D,   KC_E,   KC_LBRC, KC_RBRC,     _______, KC_P7,   KC_P8,   KC_P9,   _______, _______,
   KC_LALT,  KC_J,   KC_S,   KC_BSPC,KC_LBRC, KC_RBRC,     _______, KC_P4,   KC_P5,   KC_P6,   _______, _______,
-  _______,  KC_Z,   KC_X,   KC_C,   _______, KC_B,        _______, KC_P1,   KC_P2,   KC_P3,   _______, _______,
+  _______,  KC_Z,   KC_X,   KC_C,   PS_HIDE_SEL, KC_B,    _______, KC_P1,   KC_P2,   KC_P3,   _______, _______,
                          KC_LGUI, _______, KC_SPC,        KC_ENT,  KC_P0,   KC_PDOT
 ),
 };
