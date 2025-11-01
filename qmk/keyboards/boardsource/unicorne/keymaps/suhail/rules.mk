@@ -1,5 +1,12 @@
-# Keep it minimal for now
-# We'll enable COMBOs, RGB, etc. later as we add behavior.
-# (Skipping mouse and fancy features for step 1)
+# Keep it lean and consistent with CI
+LTO_ENABLE = yes
 
-# Nothing special yet
+# Combos for terminal splits / Neovim / PS stamp
+COMBO_ENABLE = yes
+
+# If you later want per-key lighting, we can enable this after mapping LED indices:
+# RGB_MATRIX_ENABLE = yes
+# RGB_MATRIX_DRIVER = WS2812
+
+# Optional: VIA for quick GUI edits later (off by default to keep artifacts stable)
+# VIA_ENABLE = yes
