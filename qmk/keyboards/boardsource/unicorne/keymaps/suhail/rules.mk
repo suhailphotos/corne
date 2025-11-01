@@ -6,6 +6,7 @@ COMBO_ENABLE = yes
 
 # Enable Mouse
 MOUSEKEY_ENABLE = yes
+EXTRAKEY_ENABLE = yes
 
 # If you later want per-key lighting, we can enable this after mapping LED indices:
 # RGB_MATRIX_ENABLE = yes
