@@ -1,11 +1,16 @@
 name: Build QMK (Kite)
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ghcr.io/qmk/qmk_cli:1.3.0   # pin a known tag; avoid "latest"
+    # Use the official QMK CLI container (has all toolchains preinstalled)
+    container: ghcr.io/qmk/qmk_cli:1.3.0
+
     strategy:
       matrix:
         keyboard: [boardsource/unicorne]
@@ -15,41 +20,60 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
 
-      - name: Fetch QMK Firmware at pinned commit
+      - name: Fetch QMK Firmware
         uses: actions/checkout@v4
         with:
           repository: qmk/qmk_firmware
           path: qmk_firmware
-          ref: 4a2a2ef    # <-- replace with a commit you choose & keep the same locally
           submodules: recursive
+          # ref: <optional pinned commit for reproducible builds>
 
       - name: Copy our keymap into QMK tree
         run: |
-          mkdir -p qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}
-          rsync -a qmk/keyboards/ qmk_firmware/keyboards/
+          mkdir -p "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
+          # Use cp to avoid depending on rsync in the container
+          cp -R qmk/keyboards/* qmk_firmware/keyboards/
 
       - name: Sanity check target & versions
         working-directory: qmk_firmware
         run: |
           qmk --version
-          git rev-parse HEAD
-          git -C lib/pico-sdk rev-parse HEAD || true
-          qmk info -kb ${{ matrix.keyboard }} -km ${{ matrix.keymap }}
+          qmk info -kb "${{ matrix.keyboard }}" -km "${{ matrix.keymap }}"
 
       - name: Compile
         working-directory: qmk_firmware
-        run: qmk compile -kb ${{ matrix.keyboard }} -km ${{ matrix.keymap }}
+        run: qmk compile -kb "${{ matrix.keyboard }}" -km "${{ matrix.keymap }}"
 
-      - name: Hash firmware (for reproducibility)
+      - name: Compute names (sanitize slashes)
+        id: names
+        env:
+          KB: ${{ matrix.keyboard }}
+          KM: ${{ matrix.keymap }}
         run: |
-          fn="qmk_firmware/.build/${{ matrix.keyboard//\//_ }}_${{ matrix.keymap }}.uf2"
-          sha256sum "$fn" | tee "$fn.sha256"
+          KB_SAFE_UNDERSCORE="${KB//\//_}"   # boardsource/unicorne -> boardsource_unicorne
+          KB_SAFE_DASH="${KB//\//-}"         # boardsource/unicorne -> boardsource-unicorne
 
-      - name: Upload artifact
+          echo "artifact_name=qmk-${KB_SAFE_DASH}-${KM}" >> "$GITHUB_OUTPUT"
+          echo "prefix=qmk_firmware/.build/${KB_SAFE_UNDERSCORE}_${KM}" >> "$GITHUB_OUTPUT"
+
+      - name: Find built firmware file
+        id: findfile
+        run: |
+          set -euo pipefail
+          prefix="${{ steps.names.outputs.prefix }}"
+          for ext in uf2 hex bin; do
+            if compgen -G "${prefix}.${ext}" > /dev/null; then
+              echo "built_file=${prefix}.${ext}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "No firmware file produced with prefix ${prefix}" >&2
+          ls -la qmk_firmware/.build || true
+          exit 1
+
+      - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
-          name: qmk-${{ matrix.keyboard//\//- }}-${{ matrix.keymap }}
-          path: |
-            qmk_firmware/.build/${{ matrix.keyboard//\//_ }}_${{ matrix.keymap }}.uf2
-            qmk_firmware/.build/${{ matrix.keyboard//\//_ }}_${{ matrix.keymap }}.uf2.sha256
+          name: ${{ steps.names.outputs.artifact_name }}
+          path: ${{ steps.findfile.outputs.built_file }}
           if-no-files-found: error
