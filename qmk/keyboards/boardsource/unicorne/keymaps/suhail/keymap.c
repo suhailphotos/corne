@@ -1,8 +1,45 @@
 #include QMK_KEYBOARD_H
 
-// ---- Mouse key compatibility (handles older/newer QMK keycode names) ----
+// ---- Mouse key compatibility across QMK snapshots ----
+#ifndef KC_MS_L
+#  ifdef KC_MS_LEFT
+#    define KC_MS_L KC_MS_LEFT
+#    define KC_MS_R KC_MS_RIGHT
+#    define KC_MS_U KC_MS_UP
+#    define KC_MS_D KC_MS_DOWN
+#  elif defined(MS_LEFT)
+#    define KC_MS_L MS_LEFT
+#    define KC_MS_R MS_RIGHT
+#    define KC_MS_U MS_UP
+#    define KC_MS_D MS_DOWN
+#  else
+#    define KC_MS_L KC_NO
+#    define KC_MS_R KC_NO
+#    define KC_MS_U KC_NO
+#    define KC_MS_D KC_NO
+#  endif
+#endif
+
+#ifndef KC_WH_L
+#  ifdef KC_WH_LEFT
+#    define KC_WH_L KC_WH_LEFT
+#    define KC_WH_R KC_WH_RIGHT
+#    define KC_WH_U KC_WH_UP
+#    define KC_WH_D KC_WH_DOWN
+#  else
+#    define KC_WH_L KC_NO
+#    define KC_WH_R KC_NO
+#    define KC_WH_U KC_NO
+#    define KC_WH_D KC_NO
+#  endif
+#endif
+
 #ifndef KC_BTN1
-#  ifdef MS_BTN1
+#  ifdef KC_MS_BTN1
+#    define KC_BTN1 KC_MS_BTN1
+#    define KC_BTN2 KC_MS_BTN2
+#    define KC_BTN3 KC_MS_BTN3
+#  elif defined(MS_BTN1)
 #    define KC_BTN1 MS_BTN1
 #    define KC_BTN2 MS_BTN2
 #    define KC_BTN3 MS_BTN3
@@ -11,13 +48,6 @@
 #    define KC_BTN2 KC_NO
 #    define KC_BTN3 KC_NO
 #  endif
-#endif
-
-#ifndef KC_WH_U
-#  define KC_WH_U KC_NO
-#  define KC_WH_D KC_NO
-#  define KC_WH_L KC_NO
-#  define KC_WH_R KC_NO
 #endif
 
 
@@ -65,10 +95,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_LOWER] = LAYOUT_split_3x6_3(
-    KC_GRV,  KC_1,   KC_2,   KC_3,   KC_4,   KC_5,          KC_6,   KC_7,   KC_8,   KC_9,   KC_0,     KC_MINS,
-    _______, KC_6,   KC_7,   KC_8,   KC_9,   KC_0,          KC_LEFT,KC_DOWN,KC_UP,  KC_RGHT,KC_SLSH,  KC_ASTR,
-    TG(_ART),TG(_NUM),TG(_MOUSE),    SPOTLIGHT_MAIN, SPOTLIGHT_APPS, SS_AREA,
-                                               KC_LGUI,     _______, KC_SPC, KC_ENT, MO(_FUNC), KC_RALT
+    KC_GRV,  KC_1,   KC_2,   KC_3,   KC_4,   KC_5,        KC_6,   KC_7,   KC_8,   KC_9,   KC_0,    KC_MINS,
+    _______, KC_6,   KC_7,   KC_8,   KC_9,   KC_0,        KC_LEFT,KC_DOWN,KC_UP,  KC_RGHT,KC_PSLS, KC_PAST,
+    _______, _______, _______, _______, _______, _______,  KC_MPRV,KC_VOLD,KC_VOLU,KC_MNXT,KC_MUTE, KC_MPLY,
+                               KC_LGUI, _______, KC_SPC,   KC_ENT, MO(_FUNC), KC_RALT
 ),
 
 [_RAISE] = LAYOUT_split_3x6_3(
