@@ -95,10 +95,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_LOWER] = LAYOUT_split_3x6_3(
-    KC_GRV,  KC_1,   KC_2,   KC_3,   KC_4,   KC_5,        KC_6,   KC_7,   KC_8,   KC_9,   KC_0,    KC_MINS,
-    _______, KC_6,   KC_7,   KC_8,   KC_9,   KC_0,        KC_LEFT,KC_DOWN,KC_UP,  KC_RGHT,KC_PSLS, KC_PAST,
-    _______, _______, _______, _______, _______, _______,  KC_MPRV,KC_VOLD,KC_VOLU,KC_MNXT,KC_MUTE, KC_MPLY,
-                               KC_LGUI, _______, KC_SPC,   KC_ENT, MO(_FUNC), KC_RALT
+    KC_GRV,  KC_1,   KC_2,   KC_3,   KC_4,   KC_5,         KC_6,   KC_7,   KC_8,   KC_9,   KC_0,    KC_MINS,
+    _______, KC_6,   KC_7,   KC_8,   KC_9,   KC_0,         KC_LEFT,KC_DOWN,KC_UP,  KC_RGHT,KC_PSLS, KC_PAST,
+    TG(_ART),TG(_NUM),TG(_MOUSE), SPOTLIGHT_MAIN, SPOTLIGHT_APPS, SS_AREA,
+                                                           KC_MPRV,KC_VOLD,KC_VOLU,KC_MNXT,KC_MUTE, KC_MPLY,
+                                KC_LGUI, _______, KC_SPC,  KC_ENT, MO(_FUNC), KC_RALT
 ),
 
 [_RAISE] = LAYOUT_split_3x6_3(
@@ -109,7 +110,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_NUM] = LAYOUT_split_3x6_3(
-    _______, _______, _______, _______, _______, _______,     KC_HOME, KC_7,    KC_8,    KC_9,    KC_MINS, KC_BSPC,
+    TG(_NUM), _______, _______, _______, _______, _______,     KC_HOME, KC_7,    KC_8,    KC_9,    KC_MINS, KC_BSPC,
     _______, _______, _______, _______, _______, _______,     KC_PGUP, KC_4,    KC_5,    KC_6,    KC_PLUS, KC_PAST,
     _______, _______, _______, _______, _______, _______,     KC_PGDN, KC_1,    KC_2,    KC_3,    KC_EQL,  KC_PSLS,
                                          _______, _______,    _______, KC_ENT,  KC_0,    KC_DOT
