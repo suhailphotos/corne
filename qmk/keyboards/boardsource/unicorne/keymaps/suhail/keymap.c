@@ -201,50 +201,91 @@ void process_combo_event(uint16_t index, bool pressed) {
 
 #ifdef RGB_MATRIX_ENABLE
 
-// ---------- Layer colors (tweak these to taste) ----------
-// Hue is 0–255 (not 0–360). These are just placeholders.
+// ───────────────── Layer and accent colors (edit here) ─────────────────
+
+// Layer colors (0–255 hue space)
+static const uint8_t H_BASE   = 0;
+static const uint8_t S_BASE   = 0;
+static const uint8_t V_BASE   = 90;
+
+static const uint8_t H_LOWER  = 14;    // ~20°
+static const uint8_t S_LOWER  = 180;
+static const uint8_t V_LOWER  = 90;
+
+static const uint8_t H_RAISE  = 142;   // ~200°
+static const uint8_t S_RAISE  = 200;
+static const uint8_t V_RAISE  = 90;
+
+static const uint8_t H_NUM    = 99;    // ~140°
+static const uint8_t S_NUM    = 200;
+static const uint8_t V_NUM    = 90;
+
+static const uint8_t H_MOUSE  = 71;    // ~100°
+static const uint8_t S_MOUSE  = 200;
+static const uint8_t V_MOUSE  = 90;
+
+static const uint8_t H_ART    = 241;   // ~340°
+static const uint8_t S_ART    = 180;
+static const uint8_t V_ART    = 90;
+
+// Accent colors
+// Home-row Ctrl mods
+static const uint8_t H_HOME_CTRL = 210;
+static const uint8_t S_HOME_CTRL = 200;
+static const uint8_t V_HOME_CTRL = 120;
+
+// Option / Alt (KC_LALT, KC_RALT, plus Z+X combo indicators)
+static const uint8_t H_OPTION    = 30;
+static const uint8_t S_OPTION    = 200;
+static const uint8_t V_OPTION    = 120;
+
+// Esc + Backspace
+static const uint8_t H_ESC_BSPC  = 0;
+static const uint8_t S_ESC_BSPC  = 0;
+static const uint8_t V_ESC_BSPC  = 150;
+
+
+// Get per-layer base HSV
 static void get_layer_hsv(uint8_t layer, uint8_t *h, uint8_t *s, uint8_t *v) {
     switch (layer) {
         case _LOWER:
-            *h = 14;    *s = 180; *v = 90;    // ~20° warm-ish
+            *h = H_LOWER; *s = S_LOWER; *v = V_LOWER;
             break;
         case _RAISE:
-            *h = 142;   *s = 200; *v = 90;    // ~200°
+            *h = H_RAISE; *s = S_RAISE; *v = V_RAISE;
             break;
         case _NUM:
-            *h = 99;    *s = 200; *v = 90;    // ~140°
+            *h = H_NUM; *s = S_NUM; *v = V_NUM;
             break;
         case _MOUSE:
-            *h = 71;    *s = 200; *v = 90;    // ~100°
+            *h = H_MOUSE; *s = S_MOUSE; *v = V_MOUSE;
             break;
         case _ART:
-            *h = 241;   *s = 180; *v = 90;    // ~340°
+            *h = H_ART; *s = S_ART; *v = V_ART;
             break;
         default:
-            // _BASE and anything else: dim white
-            *h = 0;     *s = 0;   *v = 90;
+            // _BASE and anything else
+            *h = H_BASE; *s = S_BASE; *v = V_BASE;
             break;
     }
 }
 
-// Run once after init: enable matrix, force solid-color mode.
+// Run once after init
 void keyboard_post_init_user(void) {
     rgb_matrix_enable_noeeprom();
     rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
 }
 
-// Per-key indicator hook: called every frame
+// Per-frame LED logic
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    // Which layer is currently "on top"?
-    uint8_t layer = get_highest_layer(layer_state | default_layer_state);
+    uint8_t active_layer = get_highest_layer(layer_state | default_layer_state);
 
-    uint8_t h, s, v;
-    get_layer_hsv(layer, &h, &s, &v);
+    uint8_t h_layer, s_layer, v_layer;
+    get_layer_hsv(active_layer, &h_layer, &s_layer, &v_layer);
 
-    HSV hsv = (HSV){ h, s, v };
-    RGB rgb = hsv_to_rgb(hsv);
+    HSV hsv_layer = (HSV){ h_layer, s_layer, v_layer };
+    RGB rgb_layer = hsv_to_rgb(hsv_layer);
 
-    // Walk the matrix and set LEDs based on keycodes
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
             uint8_t led_index = g_led_config.matrix_co[row][col];
@@ -256,20 +297,66 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
             }
 
             keypos_t key = (keypos_t){ .row = row, .col = col };
-            uint16_t keycode = keymap_key_to_keycode(layer, key);
 
-            // Only blank keys that are truly "no operation" on this layer.
-            //  - KC_NO   = XXXXXXX  -> LED OFF
-            //  - KC_TRNS = _______  -> LED ON (still active via lower layer)
+            // Resolve keycode with transparent fall-through
+            uint16_t keycode = keymap_key_to_keycode(active_layer, key);
+            if (keycode == KC_TRNS) {
+                // Walk down to lower layers until we find a non-TRNS key
+                for (int8_t l = (int8_t)active_layer - 1; l >= 0; l--) {
+                    uint16_t kc = keymap_key_to_keycode((uint8_t)l, key);
+                    if (kc != KC_TRNS) {
+                        keycode = kc;
+                        break;
+                    }
+                }
+            }
+
+            // Dead key on this layer: LED off
             if (keycode == KC_NO) {
                 rgb_matrix_set_color(led_index, 0, 0, 0);
-            } else {
-                rgb_matrix_set_color(led_index, rgb.r, rgb.g, rgb.b);
+                continue;
             }
+
+            // Start from the layer color
+            RGB rgb_final = rgb_layer;
+
+            // 1) Home-row Ctrl mods (both sides, on any layer via transparency)
+            if (keycode == LCTL_T(KC_TAB) || keycode == RCTL_T(KC_QUOT)) {
+                HSV hsv = (HSV){ H_HOME_CTRL, S_HOME_CTRL, V_HOME_CTRL };
+                rgb_final = hsv_to_rgb(hsv);
+            }
+
+            // 2) Base layer: Lower key glows with LOWER layer color
+            if (active_layer == _BASE && keycode == MO(_LOWER)) {
+                HSV hsv = (HSV){ H_LOWER, S_LOWER, V_LOWER };
+                rgb_final = hsv_to_rgb(hsv);
+            }
+
+            // 3) Base layer: Raise key glows with RAISE layer color
+            if (active_layer == _BASE && keycode == MO(_RAISE)) {
+                HSV hsv = (HSV){ H_RAISE, S_RAISE, V_RAISE };
+                rgb_final = hsv_to_rgb(hsv);
+            }
+
+            // 4) Option / Alt
+            //    - Physical Option keys (KC_LALT, KC_RALT) on any layer
+            //    - Z and X on BASE layer (visual "these two together = Option")
+            if (keycode == KC_LALT || keycode == KC_RALT ||
+                (active_layer == _BASE && (keycode == KC_Z || keycode == KC_X))) {
+                HSV hsv = (HSV){ H_OPTION, S_OPTION, V_OPTION };
+                rgb_final = hsv_to_rgb(hsv);
+            }
+
+            // 5) Esc + Backspace accent (any layer)
+            if (keycode == KC_ESC || keycode == KC_BSPC) {
+                HSV hsv = (HSV){ H_ESC_BSPC, S_ESC_BSPC, V_ESC_BSPC };
+                rgb_final = hsv_to_rgb(hsv);
+            }
+
+            rgb_matrix_set_color(led_index, rgb_final.r, rgb_final.g, rgb_final.b);
         }
     }
 
-    // return false to allow other RGB code to run if needed
     return false;
 }
 
