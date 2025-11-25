@@ -23,9 +23,3 @@
 #define MOUSEKEY_WHEEL_TIME_TO_MAX 200
 #define MOUSEKEY_WHEEL_MAX_SPEED  8
 
-// --- RGB Matrix defaults (subdued breathing) ---
-#ifdef RGB_MATRIX_ENABLE
-#    define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_BREATHING
-#    define RGB_MATRIX_DEFAULT_VAL 80      // brightness (0–255), keep it low
-#    define RGB_MATRIX_DEFAULT_SPD 20      // slower breathing
-#endif
