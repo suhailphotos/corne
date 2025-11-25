@@ -1,56 +1,5 @@
 #include QMK_KEYBOARD_H
 
-// ---- Mouse key compatibility across QMK snapshots ----
-#ifndef KC_MS_L
-#  ifdef KC_MS_LEFT
-#    define KC_MS_L KC_MS_LEFT
-#    define KC_MS_R KC_MS_RIGHT
-#    define KC_MS_U KC_MS_UP
-#    define KC_MS_D KC_MS_DOWN
-#  elif defined(MS_LEFT)
-#    define KC_MS_L MS_LEFT
-#    define KC_MS_R MS_RIGHT
-#    define KC_MS_U MS_UP
-#    define KC_MS_D MS_DOWN
-#  else
-#    define KC_MS_L KC_NO
-#    define KC_MS_R KC_NO
-#    define KC_MS_U KC_NO
-#    define KC_MS_D KC_NO
-#  endif
-#endif
-
-#ifndef KC_WH_L
-#  ifdef KC_WH_LEFT
-#    define KC_WH_L KC_WH_LEFT
-#    define KC_WH_R KC_WH_RIGHT
-#    define KC_WH_U KC_WH_UP
-#    define KC_WH_D KC_WH_DOWN
-#  else
-#    define KC_WH_L KC_NO
-#    define KC_WH_R KC_NO
-#    define KC_WH_U KC_NO
-#    define KC_WH_D KC_NO
-#  endif
-#endif
-
-#ifndef KC_BTN1
-#  ifdef KC_MS_BTN1
-#    define KC_BTN1 KC_MS_BTN1
-#    define KC_BTN2 KC_MS_BTN2
-#    define KC_BTN3 KC_MS_BTN3
-#  elif defined(MS_BTN1)
-#    define KC_BTN1 MS_BTN1
-#    define KC_BTN2 MS_BTN2
-#    define KC_BTN3 MS_BTN3
-#  else
-#    define KC_BTN1 KC_NO
-#    define KC_BTN2 KC_NO
-#    define KC_BTN3 KC_NO
-#  endif
-#endif
-
-
 // ---------- Layers ----------
 enum layer_names {
     _BASE,
@@ -124,10 +73,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_MOUSE] = LAYOUT_split_3x6_3(
-    TG(_MOUSE), _______, _______, _______, _______, _______,     KC_WH_L, KC_WH_D, KC_WH_U, KC_WH_R, _______, _______,
-    _______,    _______, _______, _______, _______, _______,     KC_MS_L, KC_MS_D, KC_MS_U, KC_MS_R, _______, _______,
-    _______,    _______, _______, _______, _______, _______,     _______, _______, _______, _______, _______, _______,
-                               _______, _______, _______,        KC_BTN1, KC_BTN2, KC_BTN3
+    TG(_MOUSE), _______, _______, _______, _______, _______,  MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR, _______, _______,
+    _______,    _______, _______, _______, _______, _______,  MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, _______, _______,
+    _______,    _______, _______, _______, _______, _______,  _______, _______, _______, _______, _______, _______,
+                              _______, _______, _______,      MS_BTN1, MS_BTN2, MS_BTN3
 ),
 
 [_ART] = LAYOUT_split_3x6_3(
