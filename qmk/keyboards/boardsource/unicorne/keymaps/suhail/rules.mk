@@ -5,7 +5,7 @@ LTO_ENABLE = yes
 COMBO_ENABLE = yes
 
 # Enable Mouse
-MOUSEKEY_ENABLE = yes
+MOUSEKEY_ENABLE = no
 EXTRAKEY_ENABLE = yes
 
 # If you later want per-key lighting, we can enable this after mapping LED indices:
