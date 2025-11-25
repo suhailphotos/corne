@@ -12,7 +12,6 @@ EXTRAKEY_ENABLE = yes
 
 # Enable per-key RGB matrix
 RGB_MATRIX_ENABLE = yes
-RGB_MATRIX_DRIVER = WS2812
 
 # Optional: VIA for quick GUI edits later (off by default to keep artifacts stable)
 VIA_ENABLE = no
