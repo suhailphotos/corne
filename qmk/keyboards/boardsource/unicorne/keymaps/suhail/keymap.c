@@ -201,18 +201,45 @@ void process_combo_event(uint16_t index, bool pressed) {
 
 #ifdef RGB_MATRIX_ENABLE
 void keyboard_post_init_user(void) {
-    // Enable RGB matrix without touching EEPROM
     rgb_matrix_enable_noeeprom();
 
-    // Keep the breathing effect
-    rgb_matrix_mode_noeeprom(RGB_MATRIX_BREATHING);
+    // Use a static color as the base; we'll animate brightness ourselves
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
 
-    // Slightly brighter for smoother fades (still not retina-melting)
-    // hue 0, sat 0 = white; val 0–255
-    rgb_matrix_sethsv_noeeprom(0, 0, 100);
-
-    // Slower breathing = smaller brightness delta per frame = smoother
-    // Try 8 first; if you want even smoother, 6 or 4.
-    rgb_matrix_set_speed_noeeprom(8);
+    // Start roughly mid-brightness white
+    rgb_matrix_sethsv_noeeprom(0, 0, 90);
 }
 #endif
+
+#ifdef RGB_MATRIX_ENABLE
+static uint8_t breath_val    = 90;  // current brightness
+static int8_t  breath_dir    = 1;   // +1 = getting brighter, -1 = getting dimmer
+static uint16_t last_breath  = 0;
+
+void matrix_scan_user(void) {
+    uint16_t now = timer_read();
+
+    // Adjust this interval for how often brightness updates (ms)
+    // 16 ms ≈ 60 FPS, very smooth.
+    if (now - last_breath > 16) {
+        last_breath = now;
+
+        // Step size = 1 brightness unit per frame -> very fine steps
+        breath_val += breath_dir;
+
+        // Clamp between floor and ceiling so we never go to "almost off",
+        // which is where the stepping looks ugliest.
+        if (breath_val >= 120) {
+            breath_val = 120;
+            breath_dir = -1;
+        } else if (breath_val <= 40) {
+            breath_val = 40;
+            breath_dir = 1;
+        }
+
+        // White, low saturation; only brightness changes
+        rgb_matrix_sethsv_noeeprom(0, 0, breath_val);
+    }
+}
+#endif
+
