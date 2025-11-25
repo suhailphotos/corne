@@ -213,22 +213,20 @@ void keyboard_post_init_user(void) {
 
 #ifdef RGB_MATRIX_ENABLE
 static uint8_t breath_val    = 90;  // current brightness
-static int8_t  breath_dir    = 1;   // +1 = getting brighter, -1 = getting dimmer
+static int8_t  breath_dir    = 1;   // +1 = brighter, -1 = dimmer
 static uint16_t last_breath  = 0;
 
 void matrix_scan_user(void) {
     uint16_t now = timer_read();
 
-    // Adjust this interval for how often brightness updates (ms)
-    // 16 ms ≈ 60 FPS, very smooth.
-    if (now - last_breath > 16) {
+    // Slower breathing: update every ~32 ms instead of 16 ms
+    if (now - last_breath > 32) {
         last_breath = now;
 
-        // Step size = 1 brightness unit per frame -> very fine steps
+        // Step size stays 1 for smoothness
         breath_val += breath_dir;
 
-        // Clamp between floor and ceiling so we never go to "almost off",
-        // which is where the stepping looks ugliest.
+        // Clamp between floor and ceiling
         if (breath_val >= 120) {
             breath_val = 120;
             breath_dir = -1;
@@ -237,9 +235,7 @@ void matrix_scan_user(void) {
             breath_dir = 1;
         }
 
-        // White, low saturation; only brightness changes
         rgb_matrix_sethsv_noeeprom(0, 0, breath_val);
     }
 }
 #endif
-
