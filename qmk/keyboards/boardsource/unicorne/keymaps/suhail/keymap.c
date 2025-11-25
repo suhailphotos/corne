@@ -252,17 +252,37 @@ static const uint8_t H_ART    = 241;   // ~340°
 static const uint8_t S_ART    = 180;
 static const uint8_t V_ART    = 90;
 
-// Accent colors (edit these to taste)
+// ───────────── Accent colors (tweak these to taste) ─────────────
 
-// Home-row Ctrl mods (left/right)
+// Home-row Ctrl mods (LCTL_T / RCTL_T)
 static const uint8_t H_HOME_CTRL = 210;
 static const uint8_t S_HOME_CTRL = 200;
 static const uint8_t V_HOME_CTRL = 120;
+
+// Command (GUI)
+static const uint8_t H_GUI       = 190;
+static const uint8_t S_GUI       = 200;
+static const uint8_t V_GUI       = 120;
 
 // Option / Alt (KC_LALT, KC_RALT, plus Z+X “Option combo” hints)
 static const uint8_t H_OPTION    = 30;
 static const uint8_t S_OPTION    = 200;
 static const uint8_t V_OPTION    = 120;
+
+// Shift (LSHFT / RSHFT)
+static const uint8_t H_SHIFT     = 230;
+static const uint8_t S_SHIFT     = 180;
+static const uint8_t V_SHIFT     = 120;
+
+// Space bar
+static const uint8_t H_SPACE     = 0;
+static const uint8_t S_SPACE     = 0;
+static const uint8_t V_SPACE     = 130;
+
+// Enter / Return
+static const uint8_t H_ENTER     = 120;
+static const uint8_t S_ENTER     = 200;
+static const uint8_t V_ENTER     = 130;
 
 // Esc + Backspace “home” keys
 static const uint8_t H_ESC_BSPC  = 0;
@@ -338,51 +358,69 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
             // 2) What is this physical key on the BASE layer?
             uint16_t base_kc = keymap_key_to_keycode(_BASE, key);
 
+            // 3) Did the role actually change?
+            bool same_role = (keycode == base_kc);
+
             // Dead key (KC_NO / XXXXXXX) in the resolved layer → LED off
             if (keycode == KC_NO) {
                 rgb_matrix_set_color(led_index, 0, 0, 0);
                 continue;
             }
 
-            // Start from the active-layer color
+            // Start from the active-layer color by default
             RGB rgb_final = rgb_layer;
 
-            // ─────────── Stable accents based on BASE layout ───────────
-            // These do NOT change when you change layers.
-
-            // 1) Home-row Ctrl mods (both sides)
-            if (base_kc == LCTL_T(KC_TAB) || base_kc == RCTL_T(KC_QUOT)) {
-                HSV hsv = (HSV){ H_HOME_CTRL, S_HOME_CTRL, V_HOME_CTRL };
-                rgb_final = hsv_to_rgb(hsv);
+            // ───────────── Stable accents (only if same_role) ─────────────
+            if (same_role) {
+                // Home-row Ctrl mods (both sides)
+                if (base_kc == LCTL_T(KC_TAB) || base_kc == RCTL_T(KC_QUOT)) {
+                    HSV hsv = (HSV){ H_HOME_CTRL, S_HOME_CTRL, V_HOME_CTRL };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // Command (GUI)
+                else if (base_kc == KC_LGUI || base_kc == KC_RGUI) {
+                    HSV hsv = (HSV){ H_GUI, S_GUI, V_GUI };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // Option / Alt:
+                //   - Physical Option keys
+                //   - Z/X as “Option combo” hint positions
+                else if (base_kc == KC_LALT || base_kc == KC_RALT ||
+                         base_kc == KC_Z    || base_kc == KC_X) {
+                    HSV hsv = (HSV){ H_OPTION, S_OPTION, V_OPTION };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // Shift keys
+                else if (base_kc == KC_LSFT || base_kc == KC_RSFT) {
+                    HSV hsv = (HSV){ H_SHIFT, S_SHIFT, V_SHIFT };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // Space bar
+                else if (base_kc == KC_SPC) {
+                    HSV hsv = (HSV){ H_SPACE, S_SPACE, V_SPACE };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // Enter / Return
+                else if (base_kc == KC_ENT) {
+                    HSV hsv = (HSV){ H_ENTER, S_ENTER, V_ENTER };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // Esc + Backspace “home” keys
+                else if (base_kc == KC_ESC || base_kc == KC_BSPC) {
+                    HSV hsv = (HSV){ H_ESC_BSPC, S_ESC_BSPC, V_ESC_BSPC };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // Layer-tap keys (keys that “take you there”)
+                else if (base_kc == MO(_LOWER)) {
+                    HSV hsv = (HSV){ H_LOWER, S_LOWER, V_LOWER };
+                    rgb_final = hsv_to_rgb(hsv);
+                } else if (base_kc == MO(_RAISE)) {
+                    HSV hsv = (HSV){ H_RAISE, S_RAISE, V_RAISE };
+                    rgb_final = hsv_to_rgb(hsv);
+                }
+                // (If you ever want MO(_FUNC) or others to have a special hue,
+                //  you can add them here with their own HSV.)
             }
-
-            // 2) Layer-tap keys: “keys that take me there”
-            //    Base position mapped to MO(_LOWER) / MO(_RAISE)
-            else if (base_kc == MO(_LOWER)) {
-                HSV hsv = (HSV){ H_LOWER, S_LOWER, V_LOWER };
-                rgb_final = hsv_to_rgb(hsv);
-            } else if (base_kc == MO(_RAISE)) {
-                HSV hsv = (HSV){ H_RAISE, S_RAISE, V_RAISE };
-                rgb_final = hsv_to_rgb(hsv);
-            }
-
-            // 3) Option / Alt:
-            //    - Physical Option keys on base (KC_LALT / KC_RALT)
-            //    - Z + X on base as the “Option combo” visual hint
-            else if (base_kc == KC_LALT || base_kc == KC_RALT ||
-                     base_kc == KC_Z    || base_kc == KC_X) {
-                HSV hsv = (HSV){ H_OPTION, S_OPTION, V_OPTION };
-                rgb_final = hsv_to_rgb(hsv);
-            }
-
-            // 4) Esc + Backspace “home” / bootloader helpers:
-            //    Any layer that lives on the Esc/Bspc base positions
-            else if (base_kc == KC_ESC || base_kc == KC_BSPC) {
-                HSV hsv = (HSV){ H_ESC_BSPC, S_ESC_BSPC, V_ESC_BSPC };
-                rgb_final = hsv_to_rgb(hsv);
-            }
-
-            // Otherwise: keep the active-layer color (rgb_layer)
 
             rgb_matrix_set_color(led_index, rgb_final.r, rgb_final.g, rgb_final.b);
         }
