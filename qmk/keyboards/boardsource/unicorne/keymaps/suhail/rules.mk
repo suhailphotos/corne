@@ -5,7 +5,7 @@ LTO_ENABLE = yes
 COMBO_ENABLE = yes
 
 # We don't want this keyboard to present any mouse/joystick HID
-MOUSEKEY_ENABLE = no
+MOUSEKEY_ENABLE = yes
 POINTING_DEVICE_ENABLE = no
 
 EXTRAKEY_ENABLE = yes
