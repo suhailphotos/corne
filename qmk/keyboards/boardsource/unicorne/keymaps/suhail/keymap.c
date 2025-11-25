@@ -74,12 +74,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_MOUSE] = LAYOUT_split_3x6_3(
+    // Row 1: left 6, right 6
     TG(_MOUSE), _______, _______, _______, _______, _______,
-        QK_MOUSE_WHEEL_LEFT,  QK_MOUSE_WHEEL_DOWN, QK_MOUSE_WHEEL_UP,   QK_MOUSE_WHEEL_RIGHT, _______, _______,
+        KC_WH_LEFT, KC_WH_DOWN, KC_WH_UP, KC_WH_RIGHT, _______, _______,
+
+    // Row 2: left 6, right 6
     _______,    _______, _______, _______, _______, _______,
-        QK_MOUSE_CURSOR_LEFT, QK_MOUSE_CURSOR_DOWN, QK_MOUSE_CURSOR_UP, QK_MOUSE_CURSOR_RIGHT, _______, _______,
+        KC_MS_LEFT, KC_MS_DOWN, KC_MS_UP, KC_MS_RIGHT, _______, _______,
+
+    // Row 3: left 6, right 6
     _______,    _______, _______, _______, _______, _______,
-        _______,               _______,               _______,          QK_MOUSE_BUTTON_1,     QK_MOUSE_BUTTON_2, QK_MOUSE_BUTTON_3
+        _______, _______, _______, _______, _______, _______,
+
+    // Thumbs: 3 left, 3 right
+                                         _______, _______, _______, KC_BTN1, KC_BTN2, KC_BTN3
 ),
 
 [_ART] = LAYOUT_split_3x6_3(
