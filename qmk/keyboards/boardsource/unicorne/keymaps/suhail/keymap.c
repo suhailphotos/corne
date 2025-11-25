@@ -315,6 +315,25 @@ static void get_layer_hsv(uint8_t layer, uint8_t *h, uint8_t *s, uint8_t *v) {
     }
 }
 
+// Resolve what this key *actually* does based on active layers
+static uint16_t get_effective_keycode(keypos_t key) {
+    uint32_t state   = layer_state | default_layer_state;
+    uint8_t  highest = get_highest_layer(state);
+
+    // Walk from highest active layer down to 0,
+    // but *only* through layers whose bit is set.
+    for (int8_t l = (int8_t)highest; l >= 0; l--) {
+        if (!(state & (1UL << l))) {
+            continue; // layer not active
+        }
+        uint16_t kc = keymap_key_to_keycode((uint8_t)l, key);
+        if (kc != KC_TRNS) {
+            return kc;
+        }
+    }
+    return KC_NO;
+}
+
 // Run once after init
 void keyboard_post_init_user(void) {
     rgb_matrix_enable_noeeprom();
@@ -323,7 +342,8 @@ void keyboard_post_init_user(void) {
 
 // Per-frame LED logic
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    uint8_t active_layer = get_highest_layer(layer_state | default_layer_state);
+    uint32_t state        = layer_state | default_layer_state;
+    uint8_t  active_layer = get_highest_layer(state);
 
     uint8_t h_layer, s_layer, v_layer;
     get_layer_hsv(active_layer, &h_layer, &s_layer, &v_layer);
@@ -343,31 +363,22 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
             keypos_t key = (keypos_t){ .row = row, .col = col };
 
-            // 1) What does this key do *right now* (with transparency)?
-            uint16_t keycode = keymap_key_to_keycode(active_layer, key);
-            if (keycode == KC_TRNS) {
-                for (int8_t l = (int8_t)active_layer - 1; l >= 0; l--) {
-                    uint16_t kc = keymap_key_to_keycode((uint8_t)l, key);
-                    if (kc != KC_TRNS) {
-                        keycode = kc;
-                        break;
-                    }
-                }
-            }
+            // 1) Effective keycode from *active* layers (with transparency)
+            uint16_t keycode = get_effective_keycode(key);
 
-            // 2) What is this physical key on the BASE layer?
+            // 2) Base-layer role for this physical key
             uint16_t base_kc = keymap_key_to_keycode(_BASE, key);
 
             // 3) Did the role actually change?
             bool same_role = (keycode == base_kc);
 
-            // Dead key (KC_NO / XXXXXXX) in the resolved layer → LED off
+            // Dead key (KC_NO / XXXXXXX after resolution) → LED off
             if (keycode == KC_NO) {
                 rgb_matrix_set_color(led_index, 0, 0, 0);
                 continue;
             }
 
-            // Start from the active-layer color by default
+            // Start from the layer color
             RGB rgb_final = rgb_layer;
 
             // ───────────── Stable accents (only if same_role) ─────────────
@@ -410,7 +421,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
                     HSV hsv = (HSV){ H_ESC_BSPC, S_ESC_BSPC, V_ESC_BSPC };
                     rgb_final = hsv_to_rgb(hsv);
                 }
-                // Layer-tap keys (keys that “take you there”)
+                // Layer keys on base: “key that takes you there”
                 else if (base_kc == MO(_LOWER)) {
                     HSV hsv = (HSV){ H_LOWER, S_LOWER, V_LOWER };
                     rgb_final = hsv_to_rgb(hsv);
@@ -418,8 +429,6 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
                     HSV hsv = (HSV){ H_RAISE, S_RAISE, V_RAISE };
                     rgb_final = hsv_to_rgb(hsv);
                 }
-                // (If you ever want MO(_FUNC) or others to have a special hue,
-                //  you can add them here with their own HSV.)
             }
 
             rgb_matrix_set_color(led_index, rgb_final.r, rgb_final.g, rgb_final.b);
