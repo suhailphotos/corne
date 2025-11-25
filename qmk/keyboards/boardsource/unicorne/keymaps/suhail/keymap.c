@@ -157,6 +157,10 @@ const uint16_t PROGMEM cb_alt_hold_zx[] = { KC_Z, KC_X, COMBO_END };
 // Base: Q+W+E -> PS_STAMP
 const uint16_t PROGMEM cb_ps_stamp_qwe[] = { KC_Q, KC_W, KC_E, COMBO_END };
 
+// Art: Q+D+E -> PS_STAMP (Art layer remaps W -> D)
+const uint16_t PROGMEM cb_ps_stamp_qde[] = { KC_Q, KC_D, KC_E, COMBO_END };
+
+
 enum combo_events {
     CB_TERM_X,
     CB_TERM_V,
@@ -166,6 +170,7 @@ enum combo_events {
     CB_NV_CLOSE,
     CB_ALT_HOLD_ZX,
     CB_PS_STAMP_QWE,
+    CB_PS_STAMP_QDE,
     COMBO_EVENT_COUNT
 };
 
@@ -178,6 +183,7 @@ combo_t key_combos[COMBO_EVENT_COUNT] = {
     [CB_NV_CLOSE]      = COMBO_ACTION(cb_nv_close),
     [CB_ALT_HOLD_ZX]   = COMBO_ACTION(cb_alt_hold_zx),
     [CB_PS_STAMP_QWE]  = COMBO_ACTION(cb_ps_stamp_qwe),
+    [CB_PS_STAMP_QDE]  = COMBO_ACTION(cb_ps_stamp_qde),
 };
 
 uint16_t COMBO_LEN = COMBO_EVENT_COUNT;
@@ -187,16 +193,16 @@ void process_combo_event(uint16_t index, bool pressed) {
     switch (index) {
         // Terminal (Ghostty/iTerm) splits
         case CB_TERM_X:
-            if (pressed) { tap_code16(G(C(KC_X))); } // Cmd+Ctrl+X (close)
+            if (pressed) { tap_code16(G(C(KC_X))); }
             break;
         case CB_TERM_V:
-            if (pressed) { tap_code16(G(C(KC_BSLS))); } // Cmd+Ctrl+Backslash (vertical split)
+            if (pressed) { tap_code16(G(C(KC_BSLS))); }
             break;
         case CB_TERM_H:
-            if (pressed) { tap_code16(G(C(KC_MINS))); } // Cmd+Ctrl+Minus (horizontal split)
+            if (pressed) { tap_code16(G(C(KC_MINS))); }
             break;
 
-        // Neovim windowing: <C-w> v / s / c
+        // Neovim windowing
         case CB_NV_HSPLIT:
             if (pressed) { tap_code16(C(KC_W)); tap_code(KC_S); }
             break;
@@ -216,9 +222,12 @@ void process_combo_event(uint16_t index, bool pressed) {
             }
             break;
 
-        // Q+W+E -> Stamp Visible
+        // PS Stamp – Base (Q+W+E) and Art (Q+D+E)
         case CB_PS_STAMP_QWE:
-            if (pressed) { tap_code16(G(A(S(KC_E)))); }
+        case CB_PS_STAMP_QDE:
+            if (pressed) {
+                tap_code16(G(A(S(KC_E))));
+            }
             break;
     }
 }
