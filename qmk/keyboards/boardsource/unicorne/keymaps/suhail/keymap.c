@@ -199,19 +199,20 @@ void process_combo_event(uint16_t index, bool pressed) {
     }
 }
 
-
 #ifdef RGB_MATRIX_ENABLE
 void keyboard_post_init_user(void) {
     // Enable RGB matrix without touching EEPROM
     rgb_matrix_enable_noeeprom();
 
-    // Set breathing effect (mode index is known by name)
+    // Keep the breathing effect
     rgb_matrix_mode_noeeprom(RGB_MATRIX_BREATHING);
 
-    // Soft white, not too bright: hue 0, saturation 0, value ~80/255
-    rgb_matrix_sethsv_noeeprom(0, 0, 80);
+    // Slightly brighter for smoother fades (still not retina-melting)
+    // hue 0, sat 0 = white; val 0–255
+    rgb_matrix_sethsv_noeeprom(0, 0, 100);
 
-    // Breathing speed (higher = faster). Tweak to taste.
-    rgb_matrix_set_speed_noeeprom(16);
+    // Slower breathing = smaller brightness delta per frame = smoother
+    // Try 8 first; if you want even smoother, 6 or 4.
+    rgb_matrix_set_speed_noeeprom(8);
 }
 #endif
