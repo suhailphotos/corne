@@ -201,54 +201,75 @@ void process_combo_event(uint16_t index, bool pressed) {
 
 #ifdef RGB_MATRIX_ENABLE
 
-// Helper: choose a color based on the active layer
-static void set_layer_rgb(uint8_t layer) {
+// ---------- Layer colors (tweak these to taste) ----------
+static void get_layer_hsv(uint8_t layer, uint8_t *h, uint8_t *s, uint8_t *v) {
     switch (layer) {
         case _LOWER:
-            // warm amber
-            rgb_matrix_sethsv_noeeprom(20, 180, 90);
+            *h = 20;   *s = 180; *v = 90;   // edit these
             break;
         case _RAISE:
-            // purple / magenta
-            rgb_matrix_sethsv_noeeprom(200, 200, 90);
+            *h = 200;  *s = 200; *v = 90;
             break;
         case _NUM:
-            // teal / cyan
-            rgb_matrix_sethsv_noeeprom(140, 200, 90);
+            *h = 140;  *s = 200; *v = 90;
             break;
         case _MOUSE:
-            // blue
-            rgb_matrix_sethsv_noeeprom(100, 200, 90);
+            *h = 100;  *s = 200; *v = 90;
             break;
         case _ART:
-            // soft pink
-            rgb_matrix_sethsv_noeeprom(340, 180, 90);
+            *h = 340;  *s = 180; *v = 90;
             break;
         default:
             // _BASE and anything else: dim white
-            rgb_matrix_sethsv_noeeprom(0, 0, 90);
+            *h = 0;    *s = 0;   *v = 90;
             break;
     }
 }
 
-// Runs once after the keyboard is initialized
+// Run once after init: enable matrix, force solid-color mode.
 void keyboard_post_init_user(void) {
     rgb_matrix_enable_noeeprom();
     rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
-
-    // Start in base color
-    set_layer_rgb(_BASE);
 }
 
-// Runs whenever the layer state changes
-layer_state_t layer_state_set_user(layer_state_t state) {
-    uint8_t layer = get_highest_layer(state);
+// Per-key indicator hook: called every frame
+bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    // Which layer is currently "on top"?
+    uint8_t layer = get_highest_layer(layer_state | default_layer_state);
 
-    // Make sure we stay in solid-color mode (in case RGB mode was changed)
-    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
-    set_layer_rgb(layer);
+    uint8_t h, s, v;
+    get_layer_hsv(layer, &h, &s, &v);
 
-    return state;
+    HSV hsv = { h, s, v };
+    RGB rgb = hsv_to_rgb(hsv);
+
+    // Walk the matrix and set LEDs based on keycodes
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+            uint8_t led_index = g_led_config.key[row][col];
+            if (led_index == NO_LED) {
+                continue;
+            }
+            if (led_index < led_min || led_index > led_max) {
+                continue;
+            }
+
+            keypos_t key = (keypos_t){ .row = row, .col = col };
+            uint16_t keycode = keymap_key_to_keycode(layer, key);
+
+            // Only blank keys that are truly "no operation" on this layer.
+            //  - KC_NO   = XXXXXXX  -> LED OFF
+            //  - KC_TRNS = _______  -> LED ON (still active via lower layer)
+            if (keycode == KC_NO) {
+                rgb_matrix_set_color(led_index, 0, 0, 0);
+            } else {
+                rgb_matrix_set_color(led_index, rgb.r, rgb.g, rgb.b);
+            }
+        }
+    }
+
+    // return false to allow other RGB code to run if needed
+    return false;
 }
 
 #endif // RGB_MATRIX_ENABLE
