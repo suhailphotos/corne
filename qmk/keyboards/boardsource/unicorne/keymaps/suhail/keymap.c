@@ -59,9 +59,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_NUM] = LAYOUT_split_3x6_3(
-    TG(_NUM), _______, _______, _______, _______, _______,     KC_HOME, KC_7,    KC_8,    KC_9,    KC_MINS, KC_BSPC,
-    _______, _______, _______, _______, _______, _______,     KC_PGUP, KC_4,    KC_5,    KC_6,    KC_PLUS, KC_PAST,
-    _______, _______, _______, _______, _______, _______,     KC_PGDN, KC_1,    KC_2,    KC_3,    KC_EQL,  KC_PSLS,
+    TG(_NUM), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_HOME, KC_7,    KC_8,    KC_9,    KC_MINS, KC_BSPC,
+    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_PGUP, KC_4,    KC_5,    KC_6,    KC_PLUS, KC_PAST,
+    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_PGDN, KC_1,    KC_2,    KC_3,    KC_EQL,  KC_PSLS,
                                          _______, _______,    _______, KC_ENT,  KC_0,    KC_DOT
 ),
 
@@ -73,17 +73,17 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 ),
 
 [_MOUSE] = LAYOUT_split_3x6_3(
-    TG(_MOUSE), _______, _______, _______, _______, _______,  MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR, _______, _______,
-    _______,    _______, _______, _______, _______, _______,  MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, _______, _______,
-    _______,    _______, _______, _______, _______, _______,  _______, _______, _______, _______, _______, _______,
+    TG(_MOUSE), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  MS_WHLL, MS_WHLD, MS_WHLU, MS_WHLR, XXXXXXX, _______,
+    _______,    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  MS_LEFT, MS_DOWN, MS_UP,   MS_RGHT, XXXXXXX, XXXXXXX,
+    _______,    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, _______,
                               _______, _______, _______,      MS_BTN1, MS_BTN2, MS_BTN3
 ),
 
 [_ART] = LAYOUT_split_3x6_3(
-    TG(_ART), KC_Q,   KC_D,   KC_E,   KC_LBRC, KC_RBRC,      _______, KC_7,    KC_8,    KC_9,    _______, _______,
-    KC_LALT,  KC_J,   KC_S,   KC_BSPC,KC_LBRC, KC_RBRC,      _______, KC_4,    KC_5,    KC_6,    _______, _______,
-    _______,  KC_Z,   KC_X,   KC_C,   PS_HIDE_SEL, KC_B,     _______, KC_1,    KC_2,    KC_3,    _______, _______,
-                                         KC_LGUI, _______,    KC_SPC, KC_ENT,  KC_0,    KC_DOT
+    TG(_ART), KC_Q,   KC_D,   KC_E,   KC_LBRC, KC_RBRC,      _______, KC_7,    KC_8,    KC_9,    XXXXXXX, XXXXXXX,
+    KC_LALT,  KC_J,   KC_S,   KC_BSPC,KC_LBRC, KC_RBRC,      _______, KC_4,    KC_5,    KC_6,    XXXXXXX, XXXXXXX,
+    _______,  KC_Z,   KC_X,   KC_C,   PS_HIDE_SEL, KC_B,     _______, KC_1,    KC_2,    KC_3,    XXXXXXX, _______,
+                                         KC_LGUI, XXXXXXX,    KC_SPC, KC_ENT,  KC_0,    KC_DOT
 )
 };
 
