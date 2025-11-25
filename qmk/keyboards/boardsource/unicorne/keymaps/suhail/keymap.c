@@ -1,5 +1,16 @@
 #include QMK_KEYBOARD_H
 
+// Small delay so macOS has time to show Spotlight before we send Cmd+1/2/3/4
+#define SPOTLIGHT_BUCKET_DELAY 90  // ms; tweak if needed
+
+static void spotlight_bucket(uint16_t kc_digit) {
+    // Cmd+Space
+    tap_code16(G(KC_SPC));
+    wait_ms(SPOTLIGHT_BUCKET_DELAY);
+    // Cmd+<digit>
+    tap_code16(G(kc_digit));
+}
+
 // ---------- Layers ----------
 enum layer_names {
     _BASE,
@@ -87,29 +98,42 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 )
 };
 
-// ---------- Process custom keycodes ----------
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (!record->event.pressed) { return true; }
 
     switch (keycode) {
         // Spotlight
-        case SPOTLIGHT_MAIN:      tap_code16(G(KC_SPC)); return false;
-        case SPOTLIGHT_APPS:      tap_code16(G(KC_SPC)); tap_code16(G(KC_1)); return false;
-        case SPOTLIGHT_FILES:     tap_code16(G(KC_SPC)); tap_code16(G(KC_2)); return false;
-        case SPOTLIGHT_ACTIONS:   tap_code16(G(KC_SPC)); tap_code16(G(KC_3)); return false;
-        case SPOTLIGHT_CLIP:      tap_code16(G(KC_SPC)); tap_code16(G(KC_4)); return false;
+        case SPOTLIGHT_MAIN:
+            tap_code16(G(KC_SPC));
+            return false;
 
-        // Screenshots
-        case SS_FULL:             tap_code16(G(S(KC_3))); return false;
-        case SS_AREA:             tap_code16(G(S(KC_4))); return false;
-        case SS_UI:               tap_code16(G(S(KC_5))); return false;
-        case SS_FULL_CLIP:        tap_code16(G(C(S(KC_3)))); return false;
-        case SS_AREA_CLIP:        tap_code16(G(C(S(KC_4)))); return false;
+        case SPOTLIGHT_APPS:
+            spotlight_bucket(KC_1);
+            return false;
+
+        case SPOTLIGHT_FILES:
+            spotlight_bucket(KC_2);
+            return false;
+
+        case SPOTLIGHT_ACTIONS:
+            spotlight_bucket(KC_3);
+            return false;
+
+        case SPOTLIGHT_CLIP:
+            spotlight_bucket(KC_4);
+            return false;
+
+        // Screenshots (macOS)
+        case SS_FULL:             tap_code16(G(S(KC_3)));         return false;
+        case SS_AREA:             tap_code16(G(S(KC_4)));         return false;
+        case SS_UI:               tap_code16(G(S(KC_5)));         return false;
+        case SS_FULL_CLIP:        tap_code16(G(C(S(KC_3))));      return false;
+        case SS_AREA_CLIP:        tap_code16(G(C(S(KC_4))));      return false;
         case SS_WINDOW:           tap_code16(G(S(KC_4))); tap_code(KC_SPC); return false;
 
         // Photoshop helpers
-        case PS_HIDE_SEL:         tap_code16(G(KC_H)); return false;
-        case PS_STAMP:            tap_code16(G(A(S(KC_E)))); return false;
+        case PS_HIDE_SEL:         tap_code16(G(KC_H));            return false;
+        case PS_STAMP:            tap_code16(G(A(S(KC_E))));      return false;
     }
     return true;
 }
