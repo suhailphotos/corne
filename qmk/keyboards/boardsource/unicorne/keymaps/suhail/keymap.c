@@ -200,42 +200,55 @@ void process_combo_event(uint16_t index, bool pressed) {
 }
 
 #ifdef RGB_MATRIX_ENABLE
-void keyboard_post_init_user(void) {
-    rgb_matrix_enable_noeeprom();
 
-    // Use a static color as the base; we'll animate brightness ourselves
-    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
-
-    // Start roughly mid-brightness white
-    rgb_matrix_sethsv_noeeprom(0, 0, 90);
-}
-#endif
-
-#ifdef RGB_MATRIX_ENABLE
-static uint8_t breath_val    = 90;  // current brightness
-static int8_t  breath_dir    = 1;   // +1 = brighter, -1 = dimmer
-static uint16_t last_breath  = 0;
-
-void matrix_scan_user(void) {
-    uint16_t now = timer_read();
-
-    // Slower breathing: update every ~32 ms instead of 16 ms
-    if (now - last_breath > 32) {
-        last_breath = now;
-
-        // Step size stays 1 for smoothness
-        breath_val += breath_dir;
-
-        // Clamp between floor and ceiling
-        if (breath_val >= 120) {
-            breath_val = 120;
-            breath_dir = -1;
-        } else if (breath_val <= 40) {
-            breath_val = 40;
-            breath_dir = 1;
-        }
-
-        rgb_matrix_sethsv_noeeprom(0, 0, breath_val);
+// Helper: choose a color based on the active layer
+static void set_layer_rgb(uint8_t layer) {
+    switch (layer) {
+        case _LOWER:
+            // warm amber
+            rgb_matrix_sethsv_noeeprom(20, 180, 90);
+            break;
+        case _RAISE:
+            // purple / magenta
+            rgb_matrix_sethsv_noeeprom(200, 200, 90);
+            break;
+        case _NUM:
+            // teal / cyan
+            rgb_matrix_sethsv_noeeprom(140, 200, 90);
+            break;
+        case _MOUSE:
+            // blue
+            rgb_matrix_sethsv_noeeprom(100, 200, 90);
+            break;
+        case _ART:
+            // soft pink
+            rgb_matrix_sethsv_noeeprom(340, 180, 90);
+            break;
+        default:
+            // _BASE and anything else: dim white
+            rgb_matrix_sethsv_noeeprom(0, 0, 90);
+            break;
     }
 }
-#endif
+
+// Runs once after the keyboard is initialized
+void keyboard_post_init_user(void) {
+    rgb_matrix_enable_noeeprom();
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+
+    // Start in base color
+    set_layer_rgb(_BASE);
+}
+
+// Runs whenever the layer state changes
+layer_state_t layer_state_set_user(layer_state_t state) {
+    uint8_t layer = get_highest_layer(state);
+
+    // Make sure we stay in solid-color mode (in case RGB mode was changed)
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+    set_layer_rgb(layer);
+
+    return state;
+}
+
+#endif // RGB_MATRIX_ENABLE

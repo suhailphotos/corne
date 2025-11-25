@@ -23,3 +23,13 @@
 #define MOUSEKEY_WHEEL_TIME_TO_MAX 200
 #define MOUSEKEY_WHEEL_MAX_SPEED  8
 
+// ---- RGB behavior ----
+// Turn off RGB after 3 minutes of no keypress.
+// (0 = never time out; here we pick 180000 ms = 3 minutes.)
+#ifdef RGB_MATRIX_TIMEOUT
+#    undef RGB_MATRIX_TIMEOUT
+#endif
+#define RGB_MATRIX_TIMEOUT 180000
+
+// Turn off RGB when the host sleeps / USB suspended
+#define RGB_DISABLE_WHEN_USB_SUSPENDED true
