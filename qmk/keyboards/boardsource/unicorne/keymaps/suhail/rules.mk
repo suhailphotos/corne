@@ -4,8 +4,10 @@ LTO_ENABLE = yes
 # Combos for terminal splits / Neovim / PS stamp
 COMBO_ENABLE = yes
 
-# Enable Mouse
+# We don't want this keyboard to present any mouse/joystick HID
 MOUSEKEY_ENABLE = no
+POINTING_DEVICE_ENABLE = no
+
 EXTRAKEY_ENABLE = yes
 
 # If you later want per-key lighting, we can enable this after mapping LED indices:
