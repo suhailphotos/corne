@@ -60,8 +60,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 [_NUM] = LAYOUT_split_3x6_3(
     TG(_NUM), XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_HOME, KC_7,    KC_8,    KC_9,    KC_MINS, KC_BSPC,
-    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_PGUP, KC_4,    KC_5,    KC_6,    KC_PLUS, KC_PAST,
-    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_PGDN, KC_1,    KC_2,    KC_3,    KC_EQL,  KC_PSLS,
+    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_PGUP, KC_4,    KC_5,    KC_6,    KC_PLUS, KC_PAST,
+    _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     KC_PGDN, KC_1,    KC_2,    KC_3,    KC_EQL,  KC_PSLS,
                                          _______, _______,    _______, KC_ENT,  KC_0,    KC_DOT
 ),
 
