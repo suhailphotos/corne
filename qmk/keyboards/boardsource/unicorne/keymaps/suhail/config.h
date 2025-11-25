@@ -22,3 +22,20 @@
 #define MOUSEKEY_WHEEL_INTERVAL   20
 #define MOUSEKEY_WHEEL_TIME_TO_MAX 200
 #define MOUSEKEY_WHEEL_MAX_SPEED  8
+
+
+// ---- RGB Matrix (per-key lighting) ----
+#ifdef RGB_MATRIX_ENABLE
+    // Cap overall brightness so it stays subdued
+    #define RGB_MATRIX_MAXIMUM_BRIGHTNESS 120
+
+    // Start in a single-color breathing effect
+    #define ENABLE_RGB_MATRIX_BREATHING
+
+    // Default (no-EEPROM) settings – soft white, slow breathing
+    #define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_BREATHING
+    #define RGB_MATRIX_DEFAULT_HUE 0    // white when saturation = 0
+    #define RGB_MATRIX_DEFAULT_SAT 0
+    #define RGB_MATRIX_DEFAULT_VAL 80   // brightness (0–255)
+    #define RGB_MATRIX_DEFAULT_SPD 16   // breathing speed
+#endif
