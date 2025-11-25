@@ -202,26 +202,27 @@ void process_combo_event(uint16_t index, bool pressed) {
 #ifdef RGB_MATRIX_ENABLE
 
 // ---------- Layer colors (tweak these to taste) ----------
+// Hue is 0–255 (not 0–360). These are just placeholders.
 static void get_layer_hsv(uint8_t layer, uint8_t *h, uint8_t *s, uint8_t *v) {
     switch (layer) {
         case _LOWER:
-            *h = 20;   *s = 180; *v = 90;   // edit these
+            *h = 14;    *s = 180; *v = 90;    // ~20° warm-ish
             break;
         case _RAISE:
-            *h = 200;  *s = 200; *v = 90;
+            *h = 142;   *s = 200; *v = 90;    // ~200°
             break;
         case _NUM:
-            *h = 140;  *s = 200; *v = 90;
+            *h = 99;    *s = 200; *v = 90;    // ~140°
             break;
         case _MOUSE:
-            *h = 100;  *s = 200; *v = 90;
+            *h = 71;    *s = 200; *v = 90;    // ~100°
             break;
         case _ART:
-            *h = 340;  *s = 180; *v = 90;
+            *h = 241;   *s = 180; *v = 90;    // ~340°
             break;
         default:
             // _BASE and anything else: dim white
-            *h = 0;    *s = 0;   *v = 90;
+            *h = 0;     *s = 0;   *v = 90;
             break;
     }
 }
@@ -240,13 +241,13 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     uint8_t h, s, v;
     get_layer_hsv(layer, &h, &s, &v);
 
-    HSV hsv = { h, s, v };
+    HSV hsv = (HSV){ h, s, v };
     RGB rgb = hsv_to_rgb(hsv);
 
     // Walk the matrix and set LEDs based on keycodes
     for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
         for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-            uint8_t led_index = g_led_config.key[row][col];
+            uint8_t led_index = g_led_config.matrix_co[row][col];
             if (led_index == NO_LED) {
                 continue;
             }
