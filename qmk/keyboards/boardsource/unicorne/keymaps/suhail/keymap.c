@@ -279,7 +279,7 @@ bool oled_task_kb(void) {
     // Row 2: layer index (1–7 to match what you see on left)
     oled_set_cursor(0, 2);
     oled_write_P(PSTR("Idx: "), false);
-    oled_write_char('0' + (layer + 1));        // Base=1, Lower=2, etc.
+    oled_write_char('0' + (layer + 1), false);  // Base=1, Lower=2, etc. (not inverted)
 
     return false; // don't call oled_task_user
 }
