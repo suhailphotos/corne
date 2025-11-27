@@ -1,48 +1,7 @@
 name: Build ZMK (Lyra)
 
-on:
-  push:
-    branches: [ main ]
-    tags:
-      - 'lyra-*'       # <— release tags for Lyra
-  pull_request:
-  workflow_dispatch:
-
-permissions:
-  contents: write
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  # Uses the official ZMK reusable workflow for your build.yaml
   build:
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
-
-  publish:
-    needs: build
-    # Only publish when this workflow was triggered by a lyra-* tag
-    if: startsWith(github.ref, 'refs/tags/lyra-')
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Download ZMK firmware artifacts from build job
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-
-      - name: List artifacts (sanity check)
-        run: |
-          echo "Artifacts downloaded:"
-          ls -R artifacts
-
-      - name: Create GitHub Release for tagged build
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}  # e.g. lyra-v1.0.0
-          name: "Lyra – ${{ github.ref_name }}"
-          body: "ZMK firmware for Corne (Lyra) built from tag ${{ github.ref_name }} using config/build.yaml."
-          draft: false
-          prerelease: false
-          files: |
-            artifacts/**
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

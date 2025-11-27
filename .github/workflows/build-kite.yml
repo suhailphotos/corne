@@ -2,18 +2,13 @@ name: Build QMK (Kite)
 
 on:
   push:
-    branches: [ main ]
-    tags:
-      - 'kite-*'        # <— release tags for Kite
   pull_request:
   workflow_dispatch:
-
-permissions:
-  contents: write  # needed for creating/updating releases
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Pin to the linux/amd64 digest of the official QMK CLI image
     container: ghcr.io/qmk/qmk_cli:latest
 
     strategy:
@@ -35,7 +30,9 @@ jobs:
       - name: Copy our keymap into QMK tree
         run: |
           mkdir -p "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
+          # copy the *contents* of qmk/keyboards into qmk_firmware/keyboards
           cp -R qmk/keyboards/. qmk_firmware/keyboards/
+          # quick sanity check
           ls -la "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
 
       - name: Compile
@@ -49,8 +46,8 @@ jobs:
           KB: ${{ matrix.keyboard }}
           KM: ${{ matrix.keymap }}
         run: |
-          KB_DASH="${KB//\//-}"
-          KB_UNDER="${KB//\//_}"
+          KB_DASH="${KB//\//-}"                    # boardsource/unicorne -> boardsource-unicorne
+          KB_UNDER="${KB//\//_}"                   # boardsource/unicorne -> boardsource_unicorne
           echo "ARTIFACT_NAME=qmk-${KB_DASH}-${KM}" >> "$GITHUB_ENV"
           echo "PREFIX=qmk_firmware/.build/${KB_UNDER}_${KM}" >> "$GITHUB_ENV"
 
@@ -71,28 +68,13 @@ jobs:
             ls -la qmk_firmware/.build || true
             exit 1
           fi
-          echo "BUILT_FILE=$file"  >> "$GITHUB_ENV"
-          echo "built_file=$file"  >> "$GITHUB_OUTPUT"
+          echo "BUILT_FILE=$file"        >> "$GITHUB_ENV"
+          echo "built_file=$file"        >> "$GITHUB_OUTPUT"
           echo "Found: $file"
 
-      - name: Upload firmware artifact (CI only)
+      - name: Upload firmware artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ steps.findfile.outputs.built_file }}
           if-no-files-found: error
-
-      - name: Create GitHub Release for tagged build
-        # Only run when this was triggered by a kite-* tag push
-        if: startsWith(github.ref, 'refs/tags/kite-')
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}   # e.g. kite-v1.0.0
-          name: "Kite – ${{ github.ref_name }}"
-          body: "QMK firmware for Boardsource Unicorne built from tag ${{ github.ref_name }}."
-          draft: false
-          prerelease: false
-          files: |
-            ${{ steps.findfile.outputs.built_file }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
