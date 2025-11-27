@@ -1,0 +1,126 @@
+name: Build Corne Firmware Bundle (Lyra + Kite)
+
+on:
+  # Only manual – you run it from Actions when you're happy with the config
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ───────────────── ZMK (Lyra) ─────────────────
+  build_zmk:
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
+    secrets: inherit
+
+  # ───────────────── QMK (Kite) ─────────────────
+  build_qmk:
+    runs-on: ubuntu-latest
+    container: ghcr.io/qmk/qmk_cli:latest
+
+    strategy:
+      matrix:
+        keyboard: [boardsource/unicorne]
+        keymap:   [suhail]
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      - name: Fetch QMK Firmware
+        uses: actions/checkout@v4
+        with:
+          repository: qmk/qmk_firmware
+          path: qmk_firmware
+          submodules: recursive
+
+      - name: Copy our keymap into QMK tree
+        run: |
+          mkdir -p "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
+          cp -R qmk/keyboards/. qmk_firmware/keyboards/
+          ls -la "qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}"
+
+      - name: Compile
+        working-directory: qmk_firmware
+        run: qmk compile -kb ${{ matrix.keyboard }} -km ${{ matrix.keymap }}
+
+      - name: Find exact firmware file
+        id: findfile
+        shell: bash
+        env:
+          KB: ${{ matrix.keyboard }}
+          KM: ${{ matrix.keymap }}
+        run: |
+          set -euo pipefail
+          KB_DASH="${KB//\//-}"
+          KB_UNDER="${KB//\//_}"
+          prefix="qmk_firmware/.build/${KB_UNDER}_${KM}"
+
+          if compgen -G "${prefix}.uf2" > /dev/null; then
+            file="${prefix}.uf2"
+          elif compgen -G "${prefix}.hex" > /dev/null; then
+            file="${prefix}.hex"
+          elif compgen -G "${prefix}.bin" > /dev/null; then
+            file="${prefix}.bin"
+          else
+            echo "No firmware file produced with prefix ${prefix}" >&2
+            ls -la qmk_firmware/.build || true
+            exit 1
+          fi
+
+          echo "BUILT_FILE=$file"  >> "$GITHUB_ENV"
+          echo "built_file=$file"  >> "$GITHUB_OUTPUT"
+          echo "Found: $file"
+
+      - name: Upload QMK firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qmk-firmware
+          path: ${{ steps.findfile.outputs.built_file }}
+          if-no-files-found: error
+
+  # ──────────────── Bundle job ────────────────
+  bundle:
+    runs-on: ubuntu-latest
+    needs: [build_zmk, build_qmk]
+
+    steps:
+      - name: Download all artifacts from this run
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create bundle structure and zip
+        run: |
+          set -euo pipefail
+
+          mkdir -p corne-firmware/qmk corne-firmware/zmk
+
+          echo "Downloaded artifacts:"
+          find artifacts -maxdepth 5 -type f -print
+
+          # QMK files (.uf2 / .hex / .bin)
+          find artifacts -maxdepth 5 -type f \( -name '*.uf2' -o -name '*.hex' -o -name '*.bin' \) \
+            -print -exec cp {} corne-firmware/qmk/ \;
+
+          # ZMK zips
+          find artifacts -maxdepth 5 -type f -name '*.zip' \
+            -print -exec cp {} corne-firmware/zmk/ \;
+
+          echo "Bundle contents:"
+          find corne-firmware -maxdepth 5 -type f -print
+
+          cd corne-firmware
+          bundle_name="corne-firmware-${{ github.run_number }}.zip"
+          zip -r "../${bundle_name}" .
+          cd ..
+
+          echo "BUNDLE_NAME=${bundle_name}" >> "$GITHUB_ENV"
+
+      - name: Upload combined bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: corne-firmware-bundle
+          path: ${{ env.BUNDLE_NAME }}
+          if-no-files-found: error
