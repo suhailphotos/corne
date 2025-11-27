@@ -239,6 +239,9 @@ void process_combo_event(uint16_t index, bool pressed) {
 
 #ifdef OLED_ENABLE
 
+// Provided by keyboards/boardsource/lib/oled.c
+void render_layer_state(void);
+
 // Short names for layers – tweak to taste
 static const char layer_name[][8] = {
     "Base",   // 0
@@ -250,42 +253,40 @@ static const char layer_name[][8] = {
     "Art",    // 6
 };
 
-bool oled_task_kb(void) {
-    // Left half: keep the stock Boardsource layer graphic
+bool oled_task_user(void) {
+    // If the keyboard firmware already draws the left OLED in oled_task_kb,
+    // we leave it alone and only touch the right side.
     if (is_keyboard_left()) {
-        render_layer_state();
-        return false;   // we fully handled drawing
+        return false;  // let keyboard-level code do its thing
     }
 
-    // Right half: custom status instead of the lulu logo
+    // Right half: custom status instead of the lulu logo (if this gets called)
     oled_clear();
 
     uint8_t layer = get_highest_layer(layer_state | default_layer_state);
-    if (layer >= sizeof(layer_name) / sizeof(layer_name[0])) {
+    if (layer >= (uint8_t)(sizeof(layer_name) / sizeof(layer_name[0]))) {
         layer = 0;
     }
 
-    // Row 0: name
+    // Row 0: "Lyra desk"
     oled_set_cursor(0, 0);
-    oled_write_P(PSTR("Lyra desk"), false);    // change this label if you like
+    oled_write_P(PSTR("Lyra desk"), false);
 
-    // Row 1: current layer
+    // Row 1: current layer name
     oled_set_cursor(0, 1);
-    oled_write_P(PSTR("Layer: "), false);
-    oled_write_P(PSTR("      "), false);       // crude clear of rest of line
+    oled_write_P(PSTR("Layer:"), false);
     oled_set_cursor(7, 1);
     oled_write(layer_name[layer], false);
 
-    // Row 2: layer index (1–7 to match what you see on left)
+    // Row 2: numeric index (1–7)
     oled_set_cursor(0, 2);
-    oled_write_P(PSTR("Idx: "), false);
-    oled_write_char('0' + (layer + 1), false);  // Base=1, Lower=2, etc. (not inverted)
+    oled_write_P(PSTR("Idx:"), false);
+    oled_write_char('0' + (layer + 1), false);
 
-    return false; // don't call oled_task_user
+    return false;  // we handled drawing for the right half
 }
 
 #endif // OLED_ENABLE
-
 
 #ifdef RGB_MATRIX_ENABLE
 
