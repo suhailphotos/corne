@@ -232,6 +232,51 @@ void process_combo_event(uint16_t index, bool pressed) {
     }
 }
 
+#ifdef OLED_ENABLE
+
+bool oled_task_user(void) {
+    // Left half: keep the stock Unicorne behavior
+    if (is_keyboard_master()) {
+        // Returning true lets unicorne.c call render_layer_state()
+        return true;
+    }
+
+    // Right half: our own little status panel
+    oled_clear();
+    oled_set_cursor(0, 0);
+
+    // You can rename these however you like
+    // We’ll use inverted text to show which one is currently active.
+
+    bool active;
+
+    // FUNC layer
+    active = layer_state_is(_FUNC);
+    oled_write_P(PSTR("FN  "), active);
+
+    // MOUSE layer (next line)
+    oled_set_cursor(0, 1);
+    active = layer_state_is(_MOUSE);
+    oled_write_P(PSTR("MOU "), active);
+
+    // ART layer (next line)
+    oled_set_cursor(0, 2);
+    active = layer_state_is(_ART);
+    oled_write_P(PSTR("ART "), active);
+
+    // You could also show the current highest layer here if you want:
+    // oled_set_cursor(0, 3);
+    // uint8_t hl = get_highest_layer(layer_state | default_layer_state);
+    // char buf[11];
+    // snprintf(buf, sizeof(buf), "L:%u   ", hl);
+    // oled_write(buf, false);
+
+    // IMPORTANT: return false on the slave, so unicorne.c DOES NOT draw the logo.
+    return false;
+}
+
+#endif // OLED_ENABLE
+
 #ifdef RGB_MATRIX_ENABLE
 
 // ───────────────── Layer and accent colors (edit here) ─────────────────
