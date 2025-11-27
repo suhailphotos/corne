@@ -1,5 +1,9 @@
 #include QMK_KEYBOARD_H
 
+#ifdef OLED_ENABLE
+#    include "oled.h"   // brings in render_layer_state(), bs_logo_img, etc.
+#endif
+
 // Small delay so macOS has time to show Spotlight before we send Cmd+1/2/3/4
 #define SPOTLIGHT_BUCKET_DELAY 90  // ms; tweak if needed
 
@@ -234,48 +238,53 @@ void process_combo_event(uint16_t index, bool pressed) {
 
 #ifdef OLED_ENABLE
 
-bool oled_task_user(void) {
-    // Left half: keep the stock Unicorne behavior
-    if (is_keyboard_master()) {
-        // Returning true lets unicorne.c call render_layer_state()
-        return true;
+// Short names for layers – tweak to taste
+static const char layer_name[][8] = {
+    "Base",   // 0
+    "Lower",  // 1
+    "Raise",  // 2
+    "Num",    // 3
+    "Func",   // 4
+    "Mouse",  // 5
+    "Art",    // 6
+};
+
+bool oled_task_kb(void) {
+    // Left half: keep the stock Boardsource layer graphic
+    if (is_keyboard_left()) {
+        render_layer_state();
+        return false;   // we fully handled drawing
     }
 
-    // Right half: our own little status panel
+    // Right half: custom status instead of the lulu logo
     oled_clear();
+
+    uint8_t layer = get_highest_layer(layer_state | default_layer_state);
+    if (layer >= sizeof(layer_name) / sizeof(layer_name[0])) {
+        layer = 0;
+    }
+
+    // Row 0: name
     oled_set_cursor(0, 0);
+    oled_write_P(PSTR("Lyra desk"), false);    // change this label if you like
 
-    // You can rename these however you like
-    // We’ll use inverted text to show which one is currently active.
-
-    bool active;
-
-    // FUNC layer
-    active = layer_state_is(_FUNC);
-    oled_write_P(PSTR("FN  "), active);
-
-    // MOUSE layer (next line)
+    // Row 1: current layer
     oled_set_cursor(0, 1);
-    active = layer_state_is(_MOUSE);
-    oled_write_P(PSTR("MOU "), active);
+    oled_write_P(PSTR("Layer: "), false);
+    oled_write_P(PSTR("      "), false);       // crude clear of rest of line
+    oled_set_cursor(7, 1);
+    oled_write(layer_name[layer], false);
 
-    // ART layer (next line)
+    // Row 2: layer index (1–7 to match what you see on left)
     oled_set_cursor(0, 2);
-    active = layer_state_is(_ART);
-    oled_write_P(PSTR("ART "), active);
+    oled_write_P(PSTR("Idx: "), false);
+    oled_write_char('0' + (layer + 1));        // Base=1, Lower=2, etc.
 
-    // You could also show the current highest layer here if you want:
-    // oled_set_cursor(0, 3);
-    // uint8_t hl = get_highest_layer(layer_state | default_layer_state);
-    // char buf[11];
-    // snprintf(buf, sizeof(buf), "L:%u   ", hl);
-    // oled_write(buf, false);
-
-    // IMPORTANT: return false on the slave, so unicorne.c DOES NOT draw the logo.
-    return false;
+    return false; // don't call oled_task_user
 }
 
 #endif // OLED_ENABLE
+
 
 #ifdef RGB_MATRIX_ENABLE
 
