@@ -1,7 +1,8 @@
 #include QMK_KEYBOARD_H
 
 #ifdef OLED_ENABLE
-#    include "oled.h"   // brings in render_layer_state(), bs_logo_img, etc.
+// Provided by keyboards/boardsource/lib/oled.c
+void render_layer_state(void);
 #endif
 
 // Small delay so macOS has time to show Spotlight before we send Cmd+1/2/3/4
