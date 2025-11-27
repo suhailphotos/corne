@@ -1,10 +1,5 @@
 #include QMK_KEYBOARD_H
 
-#ifdef OLED_ENABLE
-// Provided by keyboards/boardsource/lib/oled.c
-void render_layer_state(void);
-#endif
-
 // Small delay so macOS has time to show Spotlight before we send Cmd+1/2/3/4
 #define SPOTLIGHT_BUCKET_DELAY 90  // ms; tweak if needed
 
@@ -236,57 +231,6 @@ void process_combo_event(uint16_t index, bool pressed) {
             break;
     }
 }
-
-#ifdef OLED_ENABLE
-
-// Provided by keyboards/boardsource/lib/oled.c
-void render_layer_state(void);
-
-// Short names for layers – tweak to taste
-static const char layer_name[][8] = {
-    "Base",   // 0
-    "Lower",  // 1
-    "Raise",  // 2
-    "Num",    // 3
-    "Func",   // 4
-    "Mouse",  // 5
-    "Art",    // 6
-};
-
-bool oled_task_user(void) {
-    // If the keyboard firmware already draws the left OLED in oled_task_kb,
-    // we leave it alone and only touch the right side.
-    if (is_keyboard_left()) {
-        return false;  // let keyboard-level code do its thing
-    }
-
-    // Right half: custom status instead of the lulu logo (if this gets called)
-    oled_clear();
-
-    uint8_t layer = get_highest_layer(layer_state | default_layer_state);
-    if (layer >= (uint8_t)(sizeof(layer_name) / sizeof(layer_name[0]))) {
-        layer = 0;
-    }
-
-    // Row 0: "Lyra desk"
-    oled_set_cursor(0, 0);
-    oled_write_P(PSTR("Lyra desk"), false);
-
-    // Row 1: current layer name
-    oled_set_cursor(0, 1);
-    oled_write_P(PSTR("Layer:"), false);
-    oled_set_cursor(7, 1);
-    oled_write(layer_name[layer], false);
-
-    // Row 2: numeric index (1–7)
-    oled_set_cursor(0, 2);
-    oled_write_P(PSTR("Idx:"), false);
-    oled_write_char('0' + (layer + 1), false);
-
-    return false;  // we handled drawing for the right half
-}
-
-#endif // OLED_ENABLE
 
 #ifdef RGB_MATRIX_ENABLE
 
