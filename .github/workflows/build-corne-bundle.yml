@@ -79,17 +79,21 @@ jobs:
           path: ${{ steps.findfile.outputs.built_file }}
           if-no-files-found: error
 
-  # ──────────────── Bundle job ────────────────
   bundle:
     runs-on: ubuntu-latest
     needs: [build_zmk, build_qmk]
 
     steps:
-      - name: Download all artifacts from this run
+      - name: Download all artifacts from this run (separately)
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-          merge-multiple: true
+          merge-multiple: false   # <— important: one subfolder per artifact
+
+      - name: Inspect artifacts (debug)
+        run: |
+          echo "Artifacts tree:"
+          find artifacts -maxdepth 4 -type f -print
 
       - name: Create bundle structure and zip
         run: |
@@ -97,19 +101,31 @@ jobs:
 
           mkdir -p corne-firmware/qmk corne-firmware/zmk
 
-          echo "Downloaded artifacts:"
-          find artifacts -maxdepth 5 -type f -print
+          echo "Artifacts dirs:"
+          ls -R artifacts
 
-          # QMK files (.uf2 / .hex / .bin)
-          find artifacts -maxdepth 5 -type f \( -name '*.uf2' -o -name '*.hex' -o -name '*.bin' \) \
-            -print -exec cp {} corne-firmware/qmk/ \;
+          # QMK artifact is explicitly named "qmk-firmware" in the build_qmk job
+          if [ -d "artifacts/qmk-firmware" ]; then
+            echo "Copying QMK files from artifacts/qmk-firmware -> corne-firmware/qmk"
+            cp artifacts/qmk-firmware/* corne-firmware/qmk/ || true
+          else
+            echo "WARNING: artifacts/qmk-firmware not found"
+          fi
 
-          # ZMK zips
-          find artifacts -maxdepth 5 -type f -name '*.zip' \
-            -print -exec cp {} corne-firmware/zmk/ \;
+          # Everything else belongs to ZMK (Lyra)
+          for d in artifacts/*; do
+            name="$(basename "$d")"
+            if [ "$name" = "qmk-firmware" ]; then
+              continue
+            fi
+            if [ -d "$d" ]; then
+              echo "Copying ZMK files from $d -> corne-firmware/zmk"
+              cp "$d"/* corne-firmware/zmk/ || true
+            fi
+          done
 
           echo "Bundle contents:"
-          find corne-firmware -maxdepth 5 -type f -print
+          find corne-firmware -maxdepth 4 -type f -print
 
           cd corne-firmware
           bundle_name="corne-firmware-${{ github.run_number }}.zip"
